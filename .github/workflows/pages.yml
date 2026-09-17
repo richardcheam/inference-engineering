@@ -1,0 +1,63 @@
+name: Deploy to GitHub Pages
+
+# The site is a static build with hash routing, so it needs no server rewrites
+# and no base path: vite.config.js already emits relative asset URLs, which
+# resolve correctly under /<repository>/ on a project site.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish rather than cancelling it half-published.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # The calculation and simulation modules are what every figure on the
+      # site reports, so a deploy that fails them would publish wrong numbers.
+      # The browser suite is deliberately not run here: it drives the installed
+      # Chrome, which a runner does not have, and it guards layout rather than
+      # correctness.
+      - name: Unit tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - uses: actions/configure-pages@v5
+        with:
+          # Turns Pages on the first time this runs, so no manual setup step.
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
