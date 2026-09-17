@@ -1,0 +1,261 @@
+/* ============================================================================
+   The landing page.
+
+   06_portfolio_information_architecture §2–§4: establish identity before
+   taxonomy, give the hero one real technical artifact rather than decoration,
+   and present the body of work as an editorial index instead of a card grid.
+   Widths come from adaptive.css so this page composes like every other one.
+   ========================================================================= */
+
+.ds .home {
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
+  padding-block: clamp(var(--space-7), 8vh, var(--space-8)) var(--space-8);
+}
+
+/* ---- Hero ---------------------------------------------------------------- */
+.ds .home-hero { margin-bottom: clamp(var(--space-8), 12vh, 9rem); }
+
+.ds .home-hero h1 {
+  font-family: var(--display);
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.03em;
+  font-weight: 500;
+  margin: var(--space-5) 0 var(--space-6);
+}
+/* Each sentence balances as its own block, so neither ends on an orphan word. */
+.ds .home-hero h1 > span {
+  display: block;
+  max-inline-size: 24ch;
+  text-wrap: balance;
+}
+.ds .home-hero h1 > span + span { color: var(--muted); }
+
+.ds .home-lede {
+  font-size: var(--text-md);
+  line-height: var(--leading-snug);
+  color: var(--text);
+  max-inline-size: var(--prose);
+  margin: 0 0 var(--space-6);
+}
+
+.ds .home-start {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--accent-ink);
+  padding-block: var(--space-2);
+  border-bottom: 1px solid var(--line-strong);
+}
+.ds .home-start svg { transition: transform var(--dur-ui) var(--ease-hover); }
+.ds .home-start:hover svg { transform: translateX(3px); }
+
+/* ---- Hero artifact -------------------------------------------------------
+   The figure is the hero, so it gets the full wide track while its framing
+   text stays at reading measure above it.                                    */
+.ds .home-figure { margin-bottom: clamp(var(--space-8), 12vh, 9rem); }
+.ds .home-figure-head { margin-bottom: var(--space-6); }
+.ds .home-figure-head h2 {
+  font-family: var(--display);
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.02em;
+  font-weight: 500;
+  margin: var(--space-3) 0 var(--space-4);
+  max-inline-size: 24ch;
+}
+.ds .home-figure-head p {
+  font-size: var(--text-base);
+  line-height: var(--leading-prose);
+  color: var(--text);
+  max-inline-size: var(--prose);
+  margin: 0;
+}
+
+/* ---- Editorial chapter index --------------------------------------------
+   §4 explicitly rules out a three-up card grid. Rows carry a number, the
+   question the chapter answers, and the path it takes to answer it.          */
+.ds .home-index-title {
+  font-size: var(--text-meta);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line-strong);
+  margin: 0;
+}
+
+.ds .chapter-index { list-style: none; margin: 0; padding: 0; }
+.ds .chapter-index > li { border-bottom: 1px solid var(--line); }
+
+.ds .chapter-index a {
+  display: grid;
+  grid-template-columns: 3.25rem minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  column-gap: var(--space-5);
+  padding-block: var(--space-5);
+  color: var(--ink);
+  transition: background var(--dur-ui) var(--ease-out);
+}
+/* The hover is the whole row lifting slightly out of the page, not a card. */
+.ds .chapter-index a:hover {
+  background: var(--surface);
+  box-shadow: 0 0 0 var(--page-gutter) var(--surface);
+}
+
+.ds .chapter-number {
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.ds .chapter-text { display: block; min-width: 0; }
+.ds .chapter-text b {
+  display: block;
+  font-family: var(--display);
+  font-size: var(--text-md);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: var(--leading-snug);
+}
+.ds .chapter-text small {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--muted);
+  line-height: var(--leading-snug);
+  margin-top: var(--space-2);
+  max-inline-size: 58ch;
+}
+.ds .chapter-time {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ds .chapter-arrow { color: var(--muted); transition: transform var(--dur-ui) var(--ease-hover); }
+.ds .chapter-index a:hover .chapter-arrow { transform: translateX(3px); color: var(--accent-ink); }
+
+/* ---- Evidence stance ------------------------------------------------------ */
+.ds .home-evidence {
+  margin-top: clamp(var(--space-8), 12vh, 9rem);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--line-strong);
+  max-inline-size: var(--prose);
+}
+.ds .home-evidence p {
+  font-size: var(--text-base);
+  line-height: var(--leading-prose);
+  color: var(--text);
+  margin: var(--space-4) 0 var(--space-5);
+}
+
+/* ---- Narrow ---------------------------------------------------------------
+   The index becomes two rows: number and question, then path and duration.   */
+@media (max-width: 40rem) {
+  .ds .chapter-index a {
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    column-gap: var(--space-4);
+  }
+  .ds .chapter-arrow { display: none; }
+  .ds .home-hero h1 > span { max-inline-size: none; }
+}
+
+/* The row hover bleed relies on a solid backdrop, which a narrow viewport
+   does not have room for. */
+@media (max-width: 47.9375rem) {
+  .ds .chapter-index a:hover { box-shadow: none; }
+}
+
+/* ---- The entry point stands alone ----------------------------------------
+   The chapter rail is taxonomy, and §2 asks for identity first, so the
+   homepage drops it and reclaims the full shell width.                      */
+@media (min-width: 1025px) {
+  .workspace.at-home { margin-left: 0; }
+}
+.workspace.at-home .home { max-width: min(var(--wide), 74rem); }
+
+/* ============================================================================
+   The archive listing (#library, #bookmarks)
+
+   This was a three-up grid of icon cards: the pattern 06 §4 rules out, 08 lists
+   under "components to avoid", and SKILL.md's Law 3 names directly. It now uses
+   the same editorial row language as the homepage index, so the two index
+   surfaces of the site read as one system.
+   ========================================================================= */
+
+.ds .archive-group { margin-top: var(--space-8); }
+.ds .archive-group:first-of-type { margin-top: var(--space-6); }
+
+.ds .archive-group > h2 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--line-strong);
+  margin: 0;
+}
+.ds .archive-group > h2 > span { font-variant-numeric: tabular-nums; }
+
+.ds .archive { list-style: none; margin: 0; padding: 0; }
+.ds .archive > li { border-bottom: 1px solid var(--line); }
+
+.ds .archive a {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  column-gap: var(--space-5);
+  padding-block: var(--space-5);
+  color: var(--ink);
+  transition: background var(--dur-ui) var(--ease-out);
+}
+.ds .archive a:hover {
+  background: var(--surface);
+  box-shadow: 0 0 0 var(--page-gutter) var(--surface);
+}
+
+.ds .archive-text { display: block; min-width: 0; }
+.ds .archive-text b {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--display);
+  font-size: var(--text-md);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: var(--leading-snug);
+}
+.ds .archive-text b svg { color: var(--accent-ink); flex-shrink: 0; }
+.ds .archive-text small {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--muted);
+  line-height: var(--leading-snug);
+  margin-top: var(--space-2);
+  max-inline-size: 72ch;
+}
+.ds .archive-time {
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ds .archive-arrow { color: var(--muted); transition: transform var(--dur-ui) var(--ease-hover); }
+.ds .archive a:hover .archive-arrow { transform: translate(2px, -2px); color: var(--accent-ink); }
+
+@media (max-width: 47.9375rem) {
+  .ds .archive a { grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-4); }
+  .ds .archive-arrow { display: none; }
+  .ds .archive a:hover { box-shadow: none; }
+}

@@ -1,0 +1,253 @@
+/* ============================================================================
+   EDITORIAL PLAYBACK — module 13
+
+   The stages are the interface. The machinery is one button that changes verb,
+   a fine-adjustment scrub, and a settings affordance that is empty until asked.
+   Everything is built from the canvas tokens, so the player belongs to the page
+   rather than to the browser.
+   ========================================================================= */
+
+.ds .playback { margin: var(--space-5) 0 var(--space-6); }
+
+/* ---- §3, §8 Where am I, and what is on either side ----------------------- */
+.ds .playback-where {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin: 0 0 var(--space-3);
+}
+.ds .playback-where > b {
+  font-family: var(--display);
+  font-size: var(--text-md);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+.ds .playback-count {
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- §7, §9 The rail is the navigation, and it carries information ------- */
+.ds .stage-rail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: var(--space-2);
+}
+.ds .stage-rail > li { min-width: 0; }
+
+.ds .stage-rail button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: var(--space-3) 0 0;
+  color: var(--muted);
+  cursor: pointer;
+  /* The rule above each stage is the timeline. */
+  border-top: 2px solid var(--rule);
+  transition: color var(--dur-ui, 180ms) ease, border-color var(--dur-panel, 320ms) ease;
+}
+.ds .stage-rail > li.past button,
+.ds .stage-rail > li.active button { border-top-color: var(--identity); }
+.ds .stage-rail > li.active button { color: var(--ink); }
+.ds .stage-rail button:hover { color: var(--ink); }
+
+.ds .stage-name {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 450;
+  line-height: var(--leading-snug);
+}
+.ds .stage-rail > li.active .stage-name { font-weight: 550; color: var(--identity); }
+.ds .stage-rail small {
+  display: block;
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* The marker sits on the rule, so the rail reads as a timeline with stops. */
+.ds .stage-mark {
+  position: absolute;
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 50%;
+  background: var(--rule-strong);
+  margin-top: calc(var(--space-3) * -1 - 0.21875rem - 1px);
+  transition: background var(--dur-panel, 320ms) ease, transform var(--dur-panel, 320ms) ease;
+}
+.ds .stage-rail button { position: relative; }
+.ds .stage-rail > li.past .stage-mark,
+.ds .stage-rail > li.active .stage-mark { background: var(--identity); }
+.ds .stage-rail > li.active .stage-mark { transform: scale(1.35); }
+
+/* ---- §6, §16 One control, a small glyph inside a generous target --------- */
+.ds .playback-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+
+.ds .playback-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-4) var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--identity);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--dur-ui, 180ms) ease;
+}
+.ds .playback-primary:hover { background: color-mix(in oklab, var(--identity) 9%, transparent); }
+
+/* §10 The scrub is the fine adjustment, not the main road. */
+.ds .playback-scrub {
+  flex: 1;
+  min-width: 0;
+  box-sizing: content-box;
+  padding-block: 1.25rem;
+  margin-block: 0;
+  accent-color: var(--identity);
+}
+
+/* ---- §12 Speed lives behind a quiet secondary control -------------------- */
+.ds .playback-settings { position: relative; }
+.ds .playback-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background var(--dur-ui, 180ms) ease, color var(--dur-ui, 180ms) ease;
+}
+.ds .playback-more:hover { background: color-mix(in oklab, var(--ink) 6%, transparent); color: var(--ink); }
+
+.ds .playback-menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + var(--space-2));
+  z-index: 5;
+  min-width: 10rem;
+  padding: var(--space-3);
+  background: var(--canvas);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-md);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+.ds .playback-menu > p {
+  grid-column: 1 / -1;
+  margin: 0 0 var(--space-1);
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.ds .playback-menu button {
+  min-height: 2.25rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--graphite);
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  cursor: pointer;
+}
+.ds .playback-menu button.active { background: color-mix(in oklab, var(--identity) 12%, transparent); color: var(--identity); }
+
+.ds .playback-caption {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+  color: var(--muted);
+}
+
+/* ---- §11 Scenario navigation --------------------------------------------- */
+.ds .scenario-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5) var(--space-6);
+  margin: var(--space-4) 0 var(--space-3);
+}
+.ds .scenario-nav button {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0 0 var(--space-2);
+  text-align: left;
+  color: var(--muted);
+  cursor: pointer;
+  box-shadow: inset 0 -1px 0 transparent;
+  transition: color var(--dur-ui, 180ms) ease, box-shadow var(--dur-ui, 180ms) ease;
+}
+.ds .scenario-nav button:hover { color: var(--ink); }
+.ds .scenario-nav button.active {
+  color: var(--identity);
+  box-shadow: inset 0 -2px 0 var(--identity);
+}
+.ds .scenario-number {
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.ds .scenario-nav button.active .scenario-number { color: var(--identity); }
+.ds .scenario-label { font-size: var(--text-sm); font-weight: 450; }
+.ds .scenario-nav button.active .scenario-label { font-weight: 550; }
+
+/* ---- §23 Mobile: the stages stack rather than compress ------------------- */
+@media (max-width: 40rem) {
+  .ds .stage-rail {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    gap: 0;
+  }
+  .ds .stage-rail button {
+    border-top: 0;
+    border-left: 2px solid var(--rule);
+    padding: var(--space-2) 0 var(--space-2) var(--space-4);
+  }
+  .ds .stage-rail > li.past button,
+  .ds .stage-rail > li.active button { border-left-color: var(--identity); }
+  .ds .stage-mark { margin-top: 0; margin-left: calc(var(--space-4) * -1 - 0.21875rem - 1px); top: 0.9rem; }
+  .ds .stage-rail small { display: none; }
+  .ds .stage-rail > li.active small { display: block; }
+  .ds .playback-bar { flex-wrap: wrap; }
+  .ds .playback-scrub { flex-basis: 100%; order: 3; }
+}
+
+/* §5, §28 Nothing here animates for its own sake. */
+@media (prefers-reduced-motion: reduce) {
+  .ds .stage-rail button,
+  .ds .stage-mark,
+  .ds .playback-primary,
+  .ds .scenario-nav button { transition: none; }
+  .ds .stage-rail > li.active .stage-mark { transform: none; }
+}

@@ -1,0 +1,270 @@
+/* ============================================================================
+   Adaptive layout — fashion_engineering_frontend_skill / 11_adaptive_responsive_layout
+   Loaded last.
+
+   Fixes the failure recorded in RESPONSIVE_REFACTOR_TASK.md: the previous grid
+   pinned the rail to the viewport edge with a flexible gutter, which at 2560px
+   opened a 1288px void between article and TOC. Surplus width now goes to OUTER
+   gutters, so article and TOC stay related at every size.
+
+   Separated widths (§1): shell, prose, wide content, rails, intentional space.
+   ========================================================================= */
+
+:root {
+  /* §3 Adaptive shell — every track is fluid and bounded, none are fixed px. */
+  --left-rail:  clamp(13rem, 14vw, 17rem);
+  --right-rail: clamp(12rem, 13vw, 16rem);
+  --page-gutter: clamp(1rem, 2.2vw, 3.5rem);
+
+  /* §6 Three semantic measures, derived from this page's actual typography
+     rather than from a conventional blog width.
+
+     Body text is Inter Variable at 18px / 1.6. Measured on real lesson prose,
+     its average advance is 8.47px (0.471em), so a measure in px divides by
+     ~8.5 to give characters. The generous 1.6 leading is what lets the long
+     end of the range stay readable: a tight leading could not carry 100+
+     characters, this one can.
+
+     READING grows with the workspace instead of stopping at one fixed value.
+     The old --prose capped at 40rem/640px, which left 504px of the article
+     track empty beside every paragraph on a 1920 screen.
+
+         viewport   reading   characters
+         1280       730px     86
+         1440       752px     89
+         1512       761px     90
+         1728       790px     93
+         1920       815px     96
+         2560       900px     106
+         3440       960px     113   (capped)
+
+     min(100%, …) keeps it inside its track on narrow screens, where the
+     container, not the cap, sets the measure. */
+  --reading:   min(100%, clamp(34rem, 13.3vw + 35rem, 60rem));
+  --technical: clamp(46rem, 60vw, 74rem);  /* 736–1184px: code, equations, tables */
+  --visual:    min(100%, 96rem);           /* diagrams, topology, interactive figures */
+
+  /* Kept as aliases so nothing outside this file has to know the new names. */
+  --prose: var(--reading);
+  --wide:  var(--technical);
+  --full:  var(--visual);
+
+  /* Two older tokens predate this model and held fixed values: --measure at
+     41rem and --measure-wide at 60rem. They were the reason callouts wrapped
+     at 656px and takeaways at 960px while the prose beside them ran to 815px.
+     Redefining them here retires both without touching the eleven rules that
+     consume them. */
+  --measure:      var(--reading);
+  --measure-wide: var(--technical);
+
+  --col-gap: clamp(1.5rem, 3vw, 4.5rem);
+}
+
+/* ---- Shell --------------------------------------------------------------
+   The sidebar is fixed-position, so the workspace only needs to clear it.
+   No global max-width: the inner grid owns composition.                     */
+@media (min-width: 1025px) {
+  .sidebar { width: var(--left-rail); }
+  .workspace { margin-left: var(--left-rail); padding-inline: 0; }
+  [data-nav='collapsed'] .workspace { margin-left: 4rem; }
+  [data-nav='collapsed'] .sidebar { width: 4rem; }
+}
+
+/* ---- §4 The main grid ----------------------------------------------------
+   Four tracks. The outer 1fr pair absorbs surplus as intentional negative
+   space; the article and rail stay adjacent to each other.                  */
+@media (min-width: 1100px) {
+  .ds .reading-layout {
+    display: grid;
+    grid-template-columns:
+      minmax(var(--page-gutter), 1fr)
+      minmax(0, var(--wide))
+      minmax(11rem, var(--right-rail))
+      minmax(var(--page-gutter), 1fr);
+    column-gap: var(--col-gap);
+    max-width: none;
+    margin: 0;
+  }
+  .ds .article { grid-column: 2; min-width: 0; }
+  .ds .page-rail { grid-column: 3; padding-top: 0; }
+
+  /* §6 Prose is bounded inside the wide region; it does not set the region. */
+  .ds .section-body > p,
+  .ds .section-summary,
+  .ds .page-description,
+  .ds .prose p,
+  .ds .prose ul,
+  .ds .prose ol,
+  .ds .prose blockquote,
+  .ds .math-note,
+  .ds .key-idea,
+  .ds .takeaway,
+  .ds .caption { max-inline-size: var(--reading); }
+
+  /* Lesson prose sits directly above and below the figures it describes, so a
+     reading cap narrower than the figure left the paragraph stopping 96px
+     (1440) to 329px (1920) short of the artifact's right edge, and the two read
+     as unrelated columns. Inside the article, reading content takes the same
+     track as the artifact, so every edge in a section lines up: the rule, the
+     paragraph, the callout, and the figure. --reading still governs surfaces
+     with no artifact to align to, such as the homepage lede. */
+  .ds .article .section-body > p,
+  .ds .article .section-summary,
+  .ds .article .math-note,
+  .ds .article .key-idea,
+  .ds .article .takeaway,
+  .ds .article .caption,
+  .ds .article .prose p,
+  .ds .article .prose ul,
+  .ds .article .prose ol,
+  .ds .article .prose blockquote { max-inline-size: var(--technical); }
+
+  /* Headings read as editorial statements, so they get more room than prose
+     but stay bounded — §8 warns against absurd type on large displays.      */
+  /* §8 of the width brief: the hero and the body should feel related. Below
+     the two-column threshold the title takes exactly the reading measure, so
+     the hero and the first paragraph share one column edge. Above it the title
+     has its own grid column and is deliberately tighter than the body. */
+  .ds .article h1 { max-inline-size: var(--technical); }
+  .ds .lesson-section h2 { max-inline-size: min(var(--prose), 26ch); }
+
+  /* Technical artifacts take the full wide track — §6's mapping. */
+  .ds .explorer,
+  .ds .decode-walkthrough,
+  .ds .engine-animation,
+  .ds .math-block,
+  .ds .memory-parts,
+  .ds .rate-ladder,
+  .ds .weight-comparison,
+  .ds .comparison-pair,
+  .ds .source-quote,
+  .ds .decision-flow,
+  .ds .topology-diagram,
+  .ds .prose .table-scroll,
+  .ds .prose table,
+  .ds .prose pre {
+    width: 100%;
+    max-inline-size: none;
+  }
+}
+
+/* ---- §7 Wide-screen composition -----------------------------------------
+   Past this point the hero would otherwise float in a narrow left column.
+   The lede and metadata move beside the title rather than beneath it, using
+   content that already exists — no filler invented to fill space.           */
+@media (min-width: 105rem) {
+  .ds .article-header.lesson-header,
+  .ds .article-header {
+    display: grid;
+    /* The lede is display type (~20px), so 0.55fr left it at 26 characters —
+       narrower than the body prose it introduces. 0.8fr with a 20rem floor
+       keeps it in the low forties, and the title still leads. */
+    grid-template-columns: minmax(0, 1.2fr) minmax(20rem, 0.8fr);
+    column-gap: var(--col-gap);
+    align-items: end;
+  }
+  .ds .article-header > .article-heading { display: contents; }
+  .ds .kicker { grid-column: 1; grid-row: 1; }
+  .ds .article h1 { grid-column: 1; grid-row: 2; max-inline-size: none; }
+  .ds .page-description { grid-column: 2; grid-row: 2; align-self: end; margin-bottom: var(--space-3); }
+  .ds .article-meta { grid-column: 1 / -1; grid-row: 3; margin-top: var(--space-5); }
+}
+
+/* ---- Compact and reading states ------------------------------------------
+   Below the three-column threshold the rail collapses and content takes the
+   full readable width, per the task's Compact / Reading states.             */
+@media (max-width: 1099px) {
+  /* Align the three thresholds. Previously the rail reappeared at 1021px while
+     the grid was still block, so the TOC stacked below the article. Below the
+     grid threshold the rail is always a drawer instead. */
+  .ds .page-rail { display: none; }
+  .toc-drawer { display: block; }
+
+  .ds .reading-layout {
+    display: block;
+    max-width: var(--wide);
+    margin-inline: auto;
+    padding-inline: var(--page-gutter);
+  }
+  .ds .section-body > p,
+  .ds .prose p, .ds .prose ul, .ds .prose ol { max-inline-size: var(--prose); }
+  .ds .article h1, .ds .lesson-section h2 { max-inline-size: none; }
+}
+
+/* Tables earn the wide track at every size, scrolling only when they must. */
+.ds .prose .table-scroll { overflow-x: auto; }
+.ds .prose table { min-width: min(100%, 38rem); }
+
+/* ---- Masthead at narrow widths -------------------------------------------
+   The chrome pass enlarged the search control and icon buttons, which pushed
+   .top-actions past the viewport at 375px. The masthead is a flex row, so give
+   every child permission to shrink and drop the parts that repeat themselves.  */
+.topbar { gap: var(--space-3); min-width: 0; }
+.brand-area, .topnav, .top-actions { min-width: 0; }
+
+@media (max-width: 47.9375rem) {
+  .topbar { padding-inline: var(--page-gutter); gap: var(--space-2); }
+  .brand small { display: none; }            /* subtitle wraps and eats width */
+  .brand { font-size: var(--text-base); }
+  .top-actions { gap: var(--space-1); flex-shrink: 0; }
+  .search-trigger { min-width: 0; padding: var(--space-2); border: 0; }
+  .search-trigger > span, .search-trigger kbd { display: none; }
+  .icon-button, .search-trigger { min-width: 2.75rem; min-height: 2.75rem; }
+}
+
+/* Belt and braces: nothing in the shell may extend the document. */
+.topbar, .workspace { max-width: 100%; }
+
+/* ---- Equations must never be clipped -------------------------------------
+   Markdown-rendered KaTeX has no wrapper, so a wide formula overflowed the
+   document on narrow screens. Each display equation becomes its own scroll
+   region: readable at width, scrollable only when genuinely unavoidable. */
+.ds .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  /* Scrolling clips descenders without a little vertical room. */
+  padding-block: 0.2rem;
+}
+.ds .math-formula { max-width: 100%; }
+.ds .math-legend dt { max-width: 100%; overflow-x: auto; }
+
+/* ---- Chart labels must not dictate width ---------------------------------
+   `.chart-title`'s right-hand label carried `white-space: nowrap`, so a long
+   caption ("PINNED FIGURES · HARDWARE REFERENCE") set a 334px floor inside a
+   243px card and pushed the whole document sideways. Letting it wrap costs
+   nothing on a wide track — it still fits on one line there.                */
+.ds .chart-title { flex-wrap: wrap; }
+.ds .chart-title > span { min-width: 0; }
+.ds .chart-title > span:last-child { white-space: normal; text-wrap: balance; }
+
+/* ---- Touch targets --------------------------------------------------------
+   Gate 8 asks for sufficient touch targets. The range controls that drive every
+   explorer were 4px tall — the painted track was the whole hit area. Padding
+   grows the box to 44px without replacing the native control, so accent-color's
+   filled portion and the thumb keep rendering as before.                      */
+.ds input[type='range'] {
+  box-sizing: content-box;
+  padding-block: 1.25rem;
+  margin-block: 0;
+}
+/* The logo is also a link back to the study index. */
+.brand { padding-block: var(--space-2); }
+
+/* Animation transports are the primary control on a phone, so their buttons
+   grow with the input device rather than with a named breakpoint. */
+@media (pointer: coarse), (max-width: 47.9375rem) {
+  .ds .transport-buttons { flex-wrap: wrap; row-gap: var(--space-2); }
+  .ds .transport-buttons button { height: 2.75rem; width: 2.75rem; }
+  .ds .transport-play { padding-inline: var(--space-4); }
+  .ds .transport-speed select { height: 2.75rem; }
+}
+
+/* ---- Section fold control -------------------------------------------------
+   The heading is capped at 26ch, so on a wide track the fold chevron came to
+   rest in the middle of the column with nothing to relate to. Pushing it to the
+   track edge aligns it with the section rule above, which is where the reader
+   already looks for the section's own controls.                              */
+@media (min-width: 1100px) {
+  .ds .section-heading { justify-content: space-between; }
+}

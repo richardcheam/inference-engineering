@@ -1,0 +1,70 @@
+{
+  "kind": "CALCULATED_ESTIMATE",
+  "date": "2026-09-15",
+  "weights": {
+    "deepseek-v4.1-flash": {
+      "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "revision": "dba1be0a40aa45a94ad051997016db3960a90277",
+      "bytes": 510286023000,
+      "GB": 510.286023,
+      "GiB": 475.2408927306533
+    },
+    "glm-5.3": {
+      "model": "zai-org/GLM-5.3",
+      "revision": "aca966e4e02791568aa6a4ced368624b3d897f42",
+      "bytes": 755617140416,
+      "GB": 755.617140416,
+      "GiB": 703.7233006358147
+    },
+    "mistral-medium-3.5": {
+      "model": "mistralai/Mistral-Medium-3.5-128B",
+      "revision": "22b2b868a15677cfa6061277ed2f653d1349a9ab",
+      "bytes": 133605834656,
+      "GB": 133.605834656,
+      "GiB": 124.43012991547585
+    },
+    "qwen3.6-35b-a3b": {
+      "model": "Qwen/Qwen3.6-35B-A3B",
+      "revision": "995ad96eacd98c81ed38be0c5b274b04031597b0",
+      "bytes": 71903645408,
+      "GB": 71.903645408,
+      "GiB": 66.96548816561699
+    }
+  },
+  "cache_components": {
+    "mistral_gqa_bf16": {
+      "bytes_per_token": 360448,
+      "GiB_by_live_length": {
+        "32768": 11.0,
+        "131072": 44.0
+      }
+    },
+    "qwen_full_attention_only_bf16": {
+      "bytes_per_token": 20480,
+      "GiB_by_live_length": {
+        "32768": 0.625,
+        "131072": 2.5
+      }
+    },
+    "glm_latent_and_position_only_bf16": {
+      "bytes_per_token": 89856,
+      "GiB_by_live_length": {
+        "32768": 2.7421875,
+        "131072": 10.96875
+      }
+    },
+    "deepseek_report_global_only": {
+      "bytes_per_token": 890,
+      "GiB_by_live_length": {
+        "32768": 0.02716064453125,
+        "131072": 0.108642578125
+      }
+    }
+  },
+  "toy_expert_reuse": {
+    "1": 8.0,
+    "8": 57.42083078599535,
+    "32": 163.31384595038296,
+    "128": 251.60114596587061
+  }
+}

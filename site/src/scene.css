@@ -1,0 +1,385 @@
+/* ============================================================================
+   Explanatory scroll scene — inference_atlas_scroll_motion_v1 / module 12
+
+   One level-3 scene, in chapter four. The stage stays still while the
+   explanation beside it advances (§6), so the reader's eye keeps its place in
+   the diagram while the meaning changes. Everything else on the page stays at
+   level 0.
+
+   The scene sits at the TECHNICAL track rather than breaking out to
+   VISUAL-FULL: the table of contents is immediately to its right, and a
+   breakout would either collide with the rail or reopen the void the adaptive
+   refactor closed.
+   ========================================================================= */
+
+.ds .scene-figure { margin: var(--space-7) 0; }
+
+.ds .scene-figure-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--line-strong);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.ds .scene-provenance {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+  font-size: var(--text-xs);
+  line-height: var(--leading-snug);
+  color: var(--muted);
+}
+
+/* ---- Sticky composition --------------------------------------------------
+   The stage column is wider than the caption column, because the stage is the
+   thing being explained. Both are fluid; neither is a fixed pixel width.     */
+.ds .scene-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(15rem, 0.8fr);
+  column-gap: var(--col-gap);
+  align-items: start;
+}
+
+.ds .scene-sticky {
+  position: sticky;
+  /* Clear the fixed masthead, which is 78px, plus a little air. */
+  top: calc(env(safe-area-inset-top, 0px) + 6.5rem);
+}
+
+.ds .scene-captions { list-style: none; margin: 0; padding: 0; }
+
+/* Each caption owns roughly a screen of scroll, so one state reads as one
+   beat. Six states make the scene finite and quick to scroll past. */
+.ds .scene-captions > li {
+  min-height: 62vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0.32;
+  transition: opacity var(--dur-panel) var(--ease-out);
+}
+.ds .scene-captions > li.active { opacity: 1; }
+.ds .scene-captions > li:last-child { min-height: 46vh; }
+
+.ds .scene-step {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 var(--space-3);
+}
+.ds .scene-step > span { color: var(--accent-ink); }
+
+.ds .scene-caption {
+  font-size: var(--text-base);
+  line-height: var(--leading-prose);
+  color: var(--text);
+  margin: 0;
+  max-inline-size: 46ch;
+}
+
+/* ---- Progress ------------------------------------------------------------
+   A quiet index under the stage. It says where the reader is in the sequence
+   without asking them to operate anything.                                   */
+.ds .scene-progress {
+  list-style: none;
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.ds .scene-progress > li {
+  display: flex;
+  gap: var(--space-2);
+  opacity: 0.45;
+  transition: opacity var(--dur-ui) var(--ease-out), color var(--dur-ui) var(--ease-out);
+}
+.ds .scene-progress > li.past { opacity: 0.75; }
+.ds .scene-progress > li.active { opacity: 1; color: var(--accent-ink); }
+
+/* ---- The stage ----------------------------------------------------------- */
+.ds .scene-stage {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+}
+
+.ds .scheduler-stage { display: grid; gap: var(--space-5); }
+
+.ds .stage-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 0 0 var(--space-3);
+}
+.ds .stage-label > b {
+  font-weight: 400;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Blocks change owner between states. A short transition makes the change
+   legible as a change rather than a redraw; it explains, so it earns its
+   place (§1). */
+.ds .scheduler-stage .pool-block {
+  transition: background var(--dur-ui) var(--ease-out), border-color var(--dur-ui) var(--ease-out);
+}
+
+.ds .stage-lanes .lane {
+  grid-template-columns: 1.375rem minmax(0, 1fr) auto;
+  margin-bottom: var(--space-3);
+  transition: opacity var(--dur-ui) var(--ease-out);
+}
+.ds .stage-lanes .lane.waiting { opacity: 0.55; }
+.ds .stage-lanes .lane.focus .lane-id { outline: 2px solid var(--warn); outline-offset: 2px; }
+
+.ds .lane-fill {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  transition: width var(--dur-panel) var(--ease-out);
+}
+.ds .lane-phase {
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ---- Stacked storyboard --------------------------------------------------
+   Used on a narrow or short viewport and whenever the reader prefers reduced
+   motion. Every state gets its own stage and caption, nothing is sticky, and
+   nothing moves. The information is identical. */
+.ds .scroll-scene.stacked .scene-storyboard {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-7);
+}
+.ds .scroll-scene.stacked .scene-caption {
+  margin-top: var(--space-4);
+  max-inline-size: none;
+}
+.ds .scroll-scene.stacked .scene-stage { padding: var(--space-4); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ds .scene-captions > li,
+  .ds .scene-progress > li { transition: none; opacity: 1; }
+  .ds .scheduler-stage .pool-block,
+  .ds .stage-lanes .lane,
+  .ds .lane-fill { transition: none; }
+}
+
+/* The page-wide entrance reveal applies a transform to every direct child of a
+   section body. The scene has its own motion language and should not also fly
+   in, and a transformed ancestor is exactly the thing that quietly breaks
+   `position: sticky`, which this scene depends on. */
+.ds .lesson-section > .section-body > .scene-figure { animation: none; }
+
+/* ---- Ownership colour ----------------------------------------------------
+   The generic `.owner-N` classes are single-class selectors, so `.ds .pool-block`
+   outranked them and every claimed block rendered in the neutral surface
+   colour: the one thing the stage most needs to show, which request holds
+   which block, was invisible. Scoped here at a specificity that wins, and
+   mapped onto the editorial data palette rather than the older hexes.
+   Blocks take a tint so their labels stay legible; the lane bars carry no
+   text, so they take the full signal colour. */
+.ds .scheduler-stage .pool-block.used.owner-1 { background: color-mix(in oklab, var(--data-1) 26%, var(--surface)); border-color: color-mix(in oklab, var(--data-1) 45%, var(--surface)); }
+.ds .scheduler-stage .pool-block.used.owner-2 { background: color-mix(in oklab, var(--data-2) 26%, var(--surface)); border-color: color-mix(in oklab, var(--data-2) 45%, var(--surface)); }
+.ds .scheduler-stage .pool-block.used.owner-3 { background: color-mix(in oklab, var(--data-3) 26%, var(--surface)); border-color: color-mix(in oklab, var(--data-3) 45%, var(--surface)); }
+.ds .scheduler-stage .pool-block.free { background: var(--surface-sunk); border-style: dashed; }
+
+.ds .stage-lanes .lane-fill.owner-1 { background: var(--data-1); }
+.ds .stage-lanes .lane-fill.owner-2 { background: var(--data-2); }
+.ds .stage-lanes .lane-fill.owner-3 { background: var(--data-3); }
+.ds .stage-lanes .lane-id.owner-1 { background: var(--data-1); }
+.ds .stage-lanes .lane-id.owner-2 { background: var(--data-2); }
+.ds .stage-lanes .lane-id.owner-3 { background: var(--data-3); }
+
+/* Module 12 §22: a reading platform scrolls natively. The global
+   `scroll-behavior: smooth` that used to sit on `html` animated every anchor
+   jump, so following a table-of-contents link glided through the whole scene
+   instead of arriving, and any scroll felt a beat behind the input. Removed
+   from styles.css; `scroll-padding-top` stays, because that is about where an
+   anchor lands under the fixed masthead, not about animating the journey. */
+
+/* ---- Placement stage (chapter seven) -------------------------------------
+   Reuses the explorer's device visual so the scene and the instrument below it
+   are recognisably the same picture. */
+.ds .placement-stage { display: grid; gap: var(--space-5); }
+
+.ds .stage-readout {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+.ds .stage-readout strong {
+  display: block;
+  font-family: var(--display);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin-top: var(--space-2);
+  font-variant-numeric: tabular-nums;
+  transition: color var(--dur-panel) var(--ease-out);
+}
+.ds .stage-readout strong > small {
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: 0;
+}
+/* The one number the scene exists to show moving. */
+.ds .stage-readout strong.climbing { color: var(--warn); }
+.ds .stage-readout strong.alarming { color: var(--warn); }
+
+.ds .stage-devices .device-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(1.75rem, 1fr));
+  gap: var(--space-2);
+}
+/* Devices appear and shrink between states; the transition makes that read as
+   division rather than as a redraw. */
+.ds .stage-devices .device-fill > span {
+  transition: height var(--dur-panel) var(--ease-out), background var(--dur-ui) var(--ease-out);
+}
+.ds .stage-devices .cache.replicated { background: var(--warn); }
+
+.ds .stage-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  margin: var(--space-3) 0 0;
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  color: var(--muted);
+}
+.ds .stage-legend span { display: flex; align-items: center; gap: var(--space-2); }
+.ds .stage-legend i { width: 0.625rem; height: 0.625rem; border-radius: 2px; }
+.ds .stage-legend i.weight { background: var(--data-1); }
+.ds .stage-legend i.cache { background: var(--data-2); }
+.ds .stage-capacity { margin-left: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ds .stage-readout strong,
+  .ds .stage-devices .device-fill > span { transition: none; }
+}
+
+/* Two consecutive states can land on the same rung of the ladder, which would
+   render as the same frame twice. Each state names the quantity it is about, so
+   the readout the caption is discussing is the one the eye is sent to. */
+.ds .stage-readout > div { transition: opacity var(--dur-panel) var(--ease-out); opacity: 0.5; }
+.ds .stage-readout > div.focus { opacity: 1; }
+.ds .stage-readout > div.focus .eyebrow { color: var(--accent-ink); }
+@media (prefers-reduced-motion: reduce) {
+  .ds .stage-readout > div { transition: none; opacity: 1; }
+}
+
+/* ---- Phase stage (chapter three) -----------------------------------------
+   Two rows, one of which never moves. The weight bar is the invariant; the
+   token field beside it empties. The argument is the contrast between them,
+   so the rows keep their positions across every state. */
+.ds .phase-stage { display: grid; gap: var(--space-5); }
+
+.ds .phase-row {
+  opacity: 0.55;
+  transition: opacity var(--dur-panel) var(--ease-out);
+}
+.ds .phase-row.focus { opacity: 1; }
+.ds .phase-row.invariant { opacity: 1; }
+
+.ds .weight-bar {
+  height: 1.25rem;
+  border-radius: 2px;
+  background: var(--surface-sunk);
+  overflow: hidden;
+}
+.ds .weight-bar > span { display: block; width: 100%; height: 100%; background: var(--data-1); }
+
+.ds .token-field {
+  display: grid;
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+  gap: 3px;
+  min-height: 3.25rem;
+  align-content: start;
+  padding: var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunk);
+}
+.ds .token-field > i {
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 1px;
+  background: var(--data-2);
+  /* Marks appear and disappear between states; fading is what makes the field
+     read as emptying rather than as a different picture. */
+  animation: token-in var(--dur-ui) var(--ease-out) both;
+}
+@keyframes token-in { from { opacity: 0; transform: scale(0.7); } }
+.ds .token-field[data-phase='decode'] > i { background: var(--data-3); }
+.ds .token-empty {
+  grid-column: 1 / -1;
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  color: var(--muted);
+  align-self: center;
+}
+
+.ds .phase-note {
+  margin: var(--space-2) 0 0;
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  color: var(--muted);
+}
+
+.ds .phase-row.readout strong {
+  display: block;
+  font-family: var(--display);
+  font-size: var(--text-xl);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  transition: color var(--dur-panel) var(--ease-out);
+}
+.ds .phase-row.readout strong.low { color: var(--warn); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ds .phase-row,
+  .ds .phase-row.readout strong { transition: none; opacity: 1; }
+  .ds .token-field > i { animation: none; }
+}
+
+/* One simulation frame can be worth stopping on twice for different reasons:
+   the requests arriving and the pool they immediately fill are one step. The
+   half the caption is discussing is the half that stays lit. */
+.ds .scheduler-stage > div { transition: opacity var(--dur-panel) var(--ease-out); }
+.ds .scheduler-stage > div:not(.focus) { opacity: 0.45; }
+@media (prefers-reduced-motion: reduce) {
+  .ds .scheduler-stage > div { transition: none; opacity: 1; }
+}

@@ -1,0 +1,451 @@
+/* ============================================================================
+   ONE CANVAS — the material layer. Loaded last, so it settles every question
+   about what things are made of.
+
+   The audit found five materials where there should be one: a cool near-white
+   on `html` (#fafbf8), a warm bar for the masthead (#f3f1eb), a third tone for
+   the sidebar (#f0eee7) plus a hard right border, a fourth for every explorer
+   (#ebe9e2) with four borders around it, and a fifth sunk tone inside that
+   (#e6e3da). Four of the five existed only to say "this is a different region
+   of the application", which is the documentation-software reading we are
+   removing.
+
+   Structure now comes from typography, space and rules. Surfaces are reserved
+   for things a hand would actually touch.
+   ========================================================================= */
+
+:root {
+  /* ---- Material ---------------------------------------------------------
+     One warm canvas. Tuned against Inter at 18px on this page: lighter than
+     the old #f3f1eb read chalky under the grotesk, darker muddied the ink. */
+  --canvas:      #f2f0e9;
+  --canvas-deep: #edeae1;   /* control tracks and wells, never regions       */
+
+  --ink:      #141414;      /* headings, primary numbers                     */
+  --graphite: #3a3a38;      /* body text                                     */
+  --muted:    #6a6a66;      /* labels, captions, secondary                   */
+  --rule:     rgb(20 20 20 / 12%);   /* editorial hairline                   */
+  --rule-strong: rgb(20 20 20 / 22%); /* section and figure rules            */
+
+  /* ---- Semantic colour --------------------------------------------------
+     Four meanings, and nothing else. Each keeps its meaning everywhere.
+       identity  the guide itself, selected navigation, primary emphasis
+       flow      active process, movement, propagation
+       efficient reuse, caching, a healthy steady state
+       warning   bottleneck, anomaly, cost, the thing to look at
+     Used as ink and as a highlighter, never as a card fill. */
+  --identity:  #3c5440;
+  --flow:      #2e6b6b;
+  --efficient: #6b7a45;
+  --warning:   #b4552f;
+
+  /* ---- Radius -----------------------------------------------------------
+     A control has a surface because it is a control. Editorial content has no
+     surface, so it has no radius at all. */
+  --radius-xs: 3px;    /* chips, swatches, tiny marks                        */
+  --radius-sm: 7px;    /* small controls, segmented buttons                  */
+  --radius-md: 10px;   /* inputs, buttons, selects                           */
+  --radius-lg: 14px;   /* an interactive tool that is genuinely an object    */
+}
+
+/* Legacy tokens are remapped rather than chased through six stylesheets, so
+   existing components inherit the new system without being rewritten. */
+:root {
+  --bg:            var(--canvas);
+  --surface:       transparent;
+  --surface-sunk:  var(--canvas-deep);
+  --sidebar:       transparent;
+  --text:          var(--graphite);
+  --line:          var(--rule);
+  --line-strong:   var(--rule-strong);
+
+  --accent:      var(--identity);
+  --accent-ink:  var(--identity);
+  --finding:     var(--efficient);
+  --intuition:   var(--flow);
+  --warn:        var(--warning);
+  --warn-ink:    var(--warning);
+  --benchmark:   var(--warning);
+
+  --data-1: var(--efficient);
+  --data-2: var(--flow);
+  --data-3: var(--warning);
+
+  --radius-pill: 999px;
+  --shadow: none;
+}
+
+/* ---- §3 The four regions are one material -------------------------------- */
+:root { background: var(--canvas); }   /* `:root`, not `html`: styles.css sets it at this specificity */
+body,
+.topbar,
+.sidebar,
+.workspace,
+.ds .article,
+.ds .page-rail,
+.sidebar-backdrop { background: transparent; }
+
+/* §5 The masthead belongs to the page. It keeps a hairline only because it is
+   fixed and content passes beneath it; without that the two overlap illegibly. */
+.topbar {
+  border-bottom: 1px solid transparent;
+  background: color-mix(in oklab, var(--canvas) 86%, transparent);
+  backdrop-filter: saturate(1.1) blur(8px);
+  -webkit-backdrop-filter: saturate(1.1) blur(8px);
+  transition: border-color var(--dur-ui, 180ms) ease;
+}
+/* The hairline appears only once something has scrolled under it. */
+.topbar.is-scrolled { border-bottom-color: var(--rule); }
+
+/* §4 The wall around the sidebar. */
+.sidebar { border-right: 0; }
+
+/* ---- §4 Navigation: hierarchy from type, not from filled rectangles ------
+   The items are bare anchors in `.nav-group`. They carried a filled rounded
+   rectangle when active and a tinted one on hover, which is the documentation
+   pattern the brief names. Weight, colour and a marker in the gutter carry the
+   same information at a fraction of the visual cost. */
+.ds-nav .nav-group a,
+.nav-group a {
+  background: none;
+  border-radius: 0;
+  padding-left: var(--space-5, 1.5rem);
+  position: relative;
+  color: var(--muted);
+}
+.nav-group a:hover { background: none; color: var(--ink); }
+.nav-group a:hover > svg { color: var(--ink); }
+
+.nav-group a.active {
+  background: none;
+  color: var(--identity);
+  font-weight: 500;
+}
+.nav-group a.active > svg { color: var(--identity); }
+.nav-group a.active::before {
+  content: '';
+  position: absolute;
+  left: var(--space-2, 0.5rem);
+  top: 50%;
+  width: 0.3125rem;
+  height: 0.3125rem;
+  margin-top: -0.15625rem;
+  border-radius: 50%;
+  background: var(--identity);
+}
+/* The trailing dot repeated what the gutter marker now says. */
+.active-dot { display: none; }
+
+/* Collapsed rail: the label is gone, so the marker returns to the centre. */
+[data-nav='collapsed'] .nav-group a { padding-left: 0; }
+[data-nav='collapsed'] .nav-group a.active::before { left: 0.25rem; }
+
+.sidebar-link { background: none; border-radius: 0; }
+.sidebar-link:hover { background: none; color: var(--ink); }
+
+/* ---- §23 The table of contents is a list, not a panel -------------------- */
+.ds .page-rail,
+.toc-list,
+.toc-row { background: none; border: 0; box-shadow: none; }
+.ds .page-rail .toc-row.active,
+.ds .page-rail .toc-row[aria-current='true'] { background: none; color: var(--identity); }
+
+/* ---- §7 Containers are exceptions ---------------------------------------
+   An explorer is a tool: it keeps one soft surface, because it is a thing the
+   reader operates. Everything inside it stops being a box. */
+.ds .explorer {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+.ds .explorer-heading {
+  background: none;
+  border-radius: 0;
+  border-bottom: 1px solid var(--rule-strong);
+  padding-inline: 0;
+  padding-block: 0 var(--space-3, 0.75rem);
+}
+.ds .explorer-controls,
+.ds .explorer-foot,
+.ds .assumptions,
+.ds .scenario-picker,
+.ds .tab-strip { background: none; padding-inline: 0; }
+
+/* Controls keep an affordance, because they are controls (§13, §18). */
+.ds .explorer select,
+.ds .explorer input[type='text'],
+.ds .search-trigger,
+.ds .library-search {
+  background: var(--canvas-deep);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+}
+.ds .fan-picker button,
+.ds .scenario-picker button,
+.ds .tab-strip button {
+  border-radius: var(--radius-sm);
+}
+.ds .section-toggle,
+.ds .save-button,
+.ds .section-control { border-radius: var(--radius-sm); }
+
+/* §8 and §17: the segmented tab is a control, so it may be filled, but quietly. */
+.ds .tab-strip button.active {
+  background: color-mix(in oklab, var(--identity) 10%, transparent);
+  color: var(--identity);
+}
+
+/* ---- §14 Callouts are part of the page ----------------------------------- */
+.ds .key-idea,
+.ds .takeaway,
+.ds .assumptions {
+  background: none;
+  border: 0;
+  border-left: 2px solid var(--rule-strong);
+  border-radius: 0;
+  padding: var(--space-1, 0.25rem) 0 var(--space-1, 0.25rem) var(--space-5, 1.5rem);
+}
+.ds .key-idea { border-left-color: var(--flow); }
+.ds .key-idea.warning { border-left-color: var(--warning); }
+.ds .takeaway { border-left-color: var(--identity); }
+.ds .assumptions { border-left-color: var(--rule-strong); }
+
+/* ---- §6 Blocks that were cards become sections with rules ---------------- */
+.ds .memory-part,
+.ds .comparison-pair,
+.ds .comparison-pair > div,
+.ds .weight-comparison,
+.ds .rate-ladder,
+.ds .topology-diagram,
+.ds .source-quote,
+.ds .next-lesson,
+.ds .scene-stage,
+.ds .decision-flow > span,
+.ds .foot-note,
+.ds .symptom-picker,
+.ds .goodput-panel,
+.ds .differential,
+.ds .placement-view,
+.ds .precision-view,
+.ds .speculate-view,
+.ds .checklist,
+.ds .sim-stage {
+  background: none;
+  box-shadow: none;
+}
+.ds .memory-part,
+.ds .weight-comparison,
+.ds .rate-ladder,
+.ds .topology-diagram,
+.ds .scene-stage,
+.ds .symptom-picker,
+.ds .goodput-panel,
+.ds .placement-view,
+.ds .precision-view,
+.ds .speculate-view,
+.ds .sim-stage {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  border-radius: 0;
+  padding: var(--space-4, 1rem) 0 0;
+}
+.ds .comparison-pair { border: 0; border-radius: 0; }
+.ds .comparison-pair > div { border: 0; border-top: 1px solid var(--rule); padding-inline: 0; }
+.ds .comparison-pair > div + div { border-left: 0; }
+.ds .next-lesson { border: 0; border-top: 1px solid var(--rule-strong); border-radius: 0; padding-inline: 0; }
+.ds .foot-note { border: 0; padding: 0; color: var(--muted); }
+.ds .decision-flow > span { border-radius: 0; padding-inline: 0; }
+
+/* ---- §16 Tables read as editorial, not as a spreadsheet ------------------ */
+.ds .prose table { border: 0; }
+.ds .prose th,
+.ds .prose td { border: 0; border-bottom: 1px solid var(--rule); padding-block: var(--space-3, 0.75rem); }
+.ds .prose thead th { border-bottom: 1px solid var(--rule-strong); }
+.ds .prose tbody tr:last-child td { border-bottom: 0; }
+.ds .prose tbody tr:nth-child(even) { background: none; }
+
+/* ---- §12 Nothing editorial carries a radius ------------------------------ */
+.ds .math-formula,
+.ds .math-block,
+.ds .math-legend,
+.ds .explorer-heading,
+.ds .scene-figure { border-radius: 0; }
+
+/* ---- §27 No effects standing in for design ------------------------------- */
+.ds .explorer,
+.ds .memory-part,
+.ds .scene-stage,
+.ds .next-lesson { box-shadow: none !important; }
+
+/* ---- §13 Editorial actions are not buttons -------------------------------
+   Save and "fold every section" are things the page offers, not controls that
+   behave like a button. They were outlined rectangles, which is what made the
+   hero read as a toolbar. They keep their hit area; they lose the outline. */
+.ds .save-button,
+.ds .section-control,
+.ds .text-button,
+.ds .inline-link {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding-inline: 0;
+  color: var(--identity);
+  box-shadow: inset 0 -1px 0 var(--rule);
+  transition: box-shadow var(--dur-ui, 180ms) ease, color var(--dur-ui, 180ms) ease;
+}
+.ds .save-button:hover,
+.ds .section-control:hover,
+.ds .text-button:hover,
+.ds .inline-link:hover { box-shadow: inset 0 -1px 0 var(--identity); }
+.ds .save-button.saved { color: var(--efficient); box-shadow: inset 0 -1px 0 var(--efficient); }
+/* Keep the row from collapsing now that the boxes are gone. */
+.ds .article-meta { gap: var(--space-6, 2rem); }
+
+/* §32 deletion pass: with a marker in the gutter and forest ink on the label,
+   the per-chapter glyph was a third signal saying the same thing. */
+.nav-group a > svg { display: none; }
+.nav-group a { padding-block: var(--space-2, 0.5rem); }
+
+/* ---- §29 Token stream explorer, and every explorer like it ---------------
+   The tool is the page, not a component sitting on it. Internal regions are
+   separated by rules and space; the only surfaces left are the control track
+   and the segmented tab, both of which are operated. */
+.ds .stream-strip-wrap,
+.ds .block-strip-wrap,
+.ds .hit-gap,
+.ds .goodput-panel,
+.ds .ledger,
+.ds .all-models,
+.ds .expert-grid-wrap,
+.ds .amortization,
+.ds .bound-headline,
+.ds .transport,
+.ds .scenario-explains,
+.ds .budget-display {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  margin-inline: 0;
+  padding-inline: 0;
+}
+/* One rule where a new region begins, rather than four sides around it. */
+.ds .stream-strip-wrap,
+.ds .block-strip-wrap,
+.ds .goodput-panel,
+.ds .amortization,
+.ds .bound-headline {
+  border-top: 1px solid var(--rule);
+  padding-top: var(--space-5, 1.5rem);
+  margin-top: var(--space-5, 1.5rem);
+}
+
+/* §18 Label, value and slider are one editorial object, not a boxed control. */
+.ds .range-label { background: none; border: 0; padding: 0; }
+.ds .range-label > span { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4, 1rem); }
+.ds .range-label output {
+  font-family: var(--display);
+  font-size: var(--text-md);
+  font-weight: 500;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.ds .range-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  color: var(--muted);
+}
+.ds input[type='range'] { accent-color: var(--identity); }
+
+/* ---- §10 Colour density: the anomaly must not compete ---------------------
+   Every large readout was forest green, so the one number the section is about
+   sat among four others wearing the same colour. Neutral values are ink; the
+   semantic colour is spent only where it means something. The page now reads
+   almost monochrome until something is wrong, which is what makes the warning
+   land without a caption. */
+.ds .bound-row strong,
+.ds .goodput-summary strong,
+.ds .walk-ledger strong,
+.ds .budget-value strong { color: var(--ink); }
+
+.ds .bound-row strong.alarming,
+.ds .bound-row strong.climbing { color: var(--warning); }
+.ds .goodput-summary strong.joint { color: var(--efficient); }
+
+/* The control label that reports the current example was a bordered chip. */
+.ds .explorer-foot label > .foot-note {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: none;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+
+/* §26 The stream itself: steady gaps are a healthy state, the stall is the
+   anomaly. Both already carried colour; the roles are now the shared ones. */
+.ds .stream-strip i { background: var(--efficient); }
+.ds .stream-strip i.stall { background: var(--warning); }
+
+/* ---- Dark ----------------------------------------------------------------
+   The light palette above is defined on bare `:root`, so it is also the
+   fallback. Only the tokens change here; every rule in this file is written
+   against tokens, so the one-canvas logic holds in both themes. Warm
+   near-black rather than pure black, and the four semantic hues lifted to
+   carry on a dark ground. */
+[data-theme='dark'] {
+  --canvas:      #191917;
+  --canvas-deep: #211f1c;
+
+  --ink:      #f2f0e9;
+  --graphite: #d6d3cb;
+  --muted:    #9b978e;
+  --rule:        rgb(242 240 233 / 13%);
+  --rule-strong: rgb(242 240 233 / 26%);
+
+  --identity:  #9ebd90;
+  --flow:      #6fb4b1;
+  --efficient: #b6c481;
+  --warning:   #e08a5f;
+}
+
+/* The weight comparison pinned its value column to 31px, which held whatever
+   the number happened to be. With the card's padding gone there is room to let
+   the column size to its content instead of clipping past the viewport. */
+.ds .weight-row,
+.ds .ladder-row,
+.ds .precision-row,
+.ds .model-row {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 2fr) auto;
+  align-items: center;
+}
+.ds .weight-row > span,
+.ds .ladder-row > span,
+.ds .precision-row > span,
+.ds .model-row > span { text-align: right; white-space: nowrap; }
+
+/* `.ds .article-meta .save-button` (0,3,0) in editorial.css outranked the §13
+   rule above, so the hero's two actions kept their outlines and the hero kept
+   reading as a toolbar. Matched here at the same specificity. */
+.ds .article-meta .save-button,
+.ds .article-meta .section-control {
+  border: 0;
+  border-radius: 0;
+  padding-inline: 0;
+  background: none;
+  box-shadow: inset 0 -1px 0 var(--rule);
+}
+.ds .article-meta .save-button:hover,
+.ds .article-meta .section-control:hover {
+  border-color: transparent;
+  box-shadow: inset 0 -1px 0 var(--identity);
+  color: var(--identity);
+}
+.ds .article-meta .save-button.saved {
+  background: none;
+  border-color: transparent;
+  color: var(--efficient);
+  box-shadow: inset 0 -1px 0 var(--efficient);
+}

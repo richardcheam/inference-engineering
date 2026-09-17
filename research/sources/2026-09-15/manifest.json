@@ -1,0 +1,117 @@
+{
+  "retrieved_date": "2026-09-15",
+  "entries": [
+    {
+      "file": "deepseek-v4.1-flash.hub.json",
+      "bytes": 6214,
+      "sha256": "137cea09299e133b8149edf5462849903fee167287a70caa5d7f0d3fcbeb5d13",
+      "source_url": "https://huggingface.co/api/models/deepseek-ai/DeepSeek-V4.1-Flash",
+      "model_revision": "dba1be0a40aa45a94ad051997016db3960a90277"
+    },
+    {
+      "file": "deepseek-v4.1-flash.config.json",
+      "bytes": 3311,
+      "sha256": "8be45ce0476004a3f529fd896115a4a2e800a129ad2d3ec05b16050f52e21879",
+      "source_url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash/raw/dba1be0a40aa45a94ad051997016db3960a90277/config.json",
+      "model_revision": "dba1be0a40aa45a94ad051997016db3960a90277"
+    },
+    {
+      "file": "deepseek-v4.1-flash.model.safetensors.index.json",
+      "bytes": 7470294,
+      "sha256": "74b0686a3d2891980d5e303251b075a3bccae2c2ff650747db2620a649b98fa8",
+      "source_url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash/raw/dba1be0a40aa45a94ad051997016db3960a90277/model.safetensors.index.json",
+      "model_revision": "dba1be0a40aa45a94ad051997016db3960a90277"
+    },
+    {
+      "file": "glm-5.3.hub.json",
+      "bytes": 42085,
+      "sha256": "e3eb7a6175c931b8f9335d8770b404979afb94397bbc7e34e239751528867c6c",
+      "source_url": "https://huggingface.co/api/models/zai-org/GLM-5.3",
+      "model_revision": "aca966e4e02791568aa6a4ced368624b3d897f42"
+    },
+    {
+      "file": "glm-5.3.config.json",
+      "bytes": 29464,
+      "sha256": "3ac72612095574542f7fff847ada8e59d9199dd8af44bdf625d7e02615572e69",
+      "source_url": "https://huggingface.co/zai-org/GLM-5.3/raw/aca966e4e02791568aa6a4ced368624b3d897f42/config.json",
+      "model_revision": "aca966e4e02791568aa6a4ced368624b3d897f42"
+    },
+    {
+      "file": "glm-5.3.model.safetensors.index.json",
+      "bytes": 11359251,
+      "sha256": "e0fe7f28c1f853d4824e4d796374e3dacf1fe470988773952c79b063768134bf",
+      "source_url": "https://huggingface.co/zai-org/GLM-5.3/resolve/aca966e4e02791568aa6a4ced368624b3d897f42/model.safetensors.index.json",
+      "model_revision": "aca966e4e02791568aa6a4ced368624b3d897f42"
+    },
+    {
+      "file": "mistral-medium-3.5.hub.json",
+      "bytes": 17353,
+      "sha256": "83d09bfd73833e8bb03f6800aed8c04fd94d5d18f69d7f7fe5b9dbe29a733e7b",
+      "source_url": "https://huggingface.co/api/models/mistralai/Mistral-Medium-3.5-128B",
+      "model_revision": "22b2b868a15677cfa6061277ed2f653d1349a9ab"
+    },
+    {
+      "file": "mistral-medium-3.5.config.json",
+      "bytes": 1923,
+      "sha256": "6ebadc48e3bdfff1a6a0b863530c68c9725a49eecd21c0527bdcb21b822f4d71",
+      "source_url": "https://huggingface.co/mistralai/Mistral-Medium-3.5-128B/raw/22b2b868a15677cfa6061277ed2f653d1349a9ab/config.json",
+      "model_revision": "22b2b868a15677cfa6061277ed2f653d1349a9ab"
+    },
+    {
+      "file": "mistral-medium-3.5.model.safetensors.index.json",
+      "bytes": 255859,
+      "sha256": "0c4898b704211909ad88fa96097de59448afa43b9fdb131cfce88e281744754a",
+      "source_url": "https://huggingface.co/mistralai/Mistral-Medium-3.5-128B/raw/22b2b868a15677cfa6061277ed2f653d1349a9ab/model.safetensors.index.json",
+      "model_revision": "22b2b868a15677cfa6061277ed2f653d1349a9ab"
+    },
+    {
+      "file": "qwen3.6-35b-a3b.hub.json",
+      "bytes": 21477,
+      "sha256": "48a2084b92f04b0d589793bf19273336696b2265c83bfdb8b39c7202dfcf5124",
+      "source_url": "https://huggingface.co/api/models/Qwen/Qwen3.6-35B-A3B",
+      "model_revision": "995ad96eacd98c81ed38be0c5b274b04031597b0"
+    },
+    {
+      "file": "qwen3.6-35b-a3b.config.json",
+      "bytes": 3686,
+      "sha256": "93a4693fa9d8392fbfccd4b3c9873f4bfdcb14fdede978b123d07d19675efe99",
+      "source_url": "https://huggingface.co/Qwen/Qwen3.6-35B-A3B/raw/995ad96eacd98c81ed38be0c5b274b04031597b0/config.json",
+      "model_revision": "995ad96eacd98c81ed38be0c5b274b04031597b0"
+    },
+    {
+      "file": "qwen3.6-35b-a3b.model.safetensors.index.json",
+      "bytes": 98383,
+      "sha256": "41b9356101ebf8e7519e150dc811f80c4226e727301fbb032b890f006ed0be83",
+      "source_url": "https://huggingface.co/Qwen/Qwen3.6-35B-A3B/raw/995ad96eacd98c81ed38be0c5b274b04031597b0/model.safetensors.index.json",
+      "model_revision": "995ad96eacd98c81ed38be0c5b274b04031597b0"
+    },
+    {
+      "file": "vllm-cache-config.py",
+      "bytes": 17129,
+      "sha256": "f1c226ba679c884930dbfcaf41a57248b137a9a20d3ed8e3d3b31752bb484c07",
+      "source_url": "https://raw.githubusercontent.com/vllm-project/vllm/836bb3839ffefcda8283ea7d41671a89e1a613df/vllm/config/cache.py",
+      "engine_revision": "836bb3839ffefcda8283ea7d41671a89e1a613df"
+    },
+    {
+      "file": "vllm-scheduler.py",
+      "bytes": 152786,
+      "sha256": "c1db45f3bbad3a875dd8638331b8870c4380ac1ab4734265ba5c863833a82884",
+      "source_url": "https://raw.githubusercontent.com/vllm-project/vllm/836bb3839ffefcda8283ea7d41671a89e1a613df/vllm/v1/core/sched/scheduler.py",
+      "engine_revision": "836bb3839ffefcda8283ea7d41671a89e1a613df"
+    },
+    {
+      "file": "vllm-kv-cache-manager.py",
+      "bytes": 41398,
+      "sha256": "58800535eda854580d84e1025bf32fe01b2a43ce0bba501b4f3d125e4f2c8afa",
+      "source_url": "https://raw.githubusercontent.com/vllm-project/vllm/836bb3839ffefcda8283ea7d41671a89e1a613df/vllm/v1/core/kv_cache_manager.py",
+      "engine_revision": "836bb3839ffefcda8283ea7d41671a89e1a613df"
+    },
+    {
+      "file": "vllm-test-prefix-caching.py",
+      "bytes": 215777,
+      "sha256": "e5092f4e48128b5931bbd3f297235b8e403a5e50591d6a857b423c589c02188d",
+      "source_url": "https://raw.githubusercontent.com/vllm-project/vllm/836bb3839ffefcda8283ea7d41671a89e1a613df/tests/v1/core/test_prefix_caching.py",
+      "engine_revision": "836bb3839ffefcda8283ea7d41671a89e1a613df"
+    }
+  ]
+}

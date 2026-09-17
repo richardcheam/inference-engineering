@@ -1,0 +1,860 @@
+/* ============================================================================
+   Inference Atlas — design system
+   Tokens for a technical learning environment: textbook + documentation.
+   Rules: no arbitrary values in components; check for an existing token before
+   adding one. See .claude/learning-ui-skill.md and the 2026-09-16 audit.
+   ========================================================================= */
+
+:root {
+  /* ---- Type scale -------------------------------------------------------
+     Base 17px prose on desktop. Nothing below --text-xs (13px) is permitted
+     for learning content; 12px exists only for metadata such as counts.      */
+  --text-meta:  0.75rem;   /* 12px — counts, timestamps, tertiary only        */
+  --text-xs:    0.8125rem; /* 13px — captions, axis labels                    */
+  --text-sm:    0.875rem;  /* 14px — secondary UI, TOC, sidebar nav, legends  */
+  --text-base:  1rem;      /* 16px — body on small screens                    */
+  --text-body:  1.0625rem; /* 17px — body prose on desktop                    */
+  --text-md:    1.1875rem; /* 19px — lead paragraph                           */
+  --text-lg:    1.375rem;  /* 22px — h3                                       */
+  --text-xl:    1.625rem;  /* 26px — h2, section headings                     */
+  --text-2xl:   2rem;      /* 32px — h1; deliberately not a hero              */
+
+  --leading-tight: 1.25;   /* headings                                        */
+  --leading-snug:  1.45;   /* dense UI, legends                               */
+  --leading-prose: 1.65;   /* body copy — inside the required 1.55–1.75       */
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semi:   600;
+
+  /* ---- Spacing scale (4px base) ---------------------------------------- */
+  --space-1: 0.25rem;  /*  4 */
+  --space-2: 0.5rem;   /*  8 */
+  --space-3: 0.75rem;  /* 12 */
+  --space-4: 1rem;     /* 16 */
+  --space-5: 1.5rem;   /* 24 */
+  --space-6: 2rem;     /* 32 */
+  --space-7: 3rem;     /* 48 */
+  --space-8: 4rem;     /* 64 */
+
+  /* ---- Content widths ---------------------------------------------------
+     Measure is expressed in ch so it tracks the font, not a magic pixel.    */
+  --measure: 62ch;          /* prose: measures ~72 real characters           */
+  --measure-wide: 90ch;     /* tables, charts, explorers                     */
+  --rail-width: 15rem;      /* 240px — readable TOC, not footnote text       */
+  --topbar-height: 78px;    /* matches the fixed masthead                     */
+  --sidebar-width: 15.5rem; /* 248px                                         */
+
+  /* ---- Radius ----------------------------------------------------------- */
+  --radius-sm: 6px;    /* chips, tags, small swatches                       */
+  --radius-md: 10px;   /* buttons, inputs, inner panels                     */
+  --radius-lg: 14px;   /* explorers, cards, quoted source                   */
+  --radius-pill: 999px;
+
+  /* ---- Borders ---------------------------------------------------------- */
+  --border: 1px solid var(--line);
+  --border-strong: 1px solid var(--line-strong);
+  --border-accent: 2px solid var(--accent);
+
+  /* ---- Motion ------------------------------------------------------------ */
+  --motion-fast: 120ms;
+  --motion-base: 180ms;
+  --motion-slow: 260ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ---- Colour -----------------------------------------------------------
+     Light theme. Semantic names only; components never use literals.        */
+  --bg:            #fbfbf9;
+  --surface:       #ffffff;
+  --surface-sunk:  #f4f5f1;
+  --sidebar:       #f7f8f4;
+  --ink:           #1e2a24;  /* headings                                     */
+  --text:          #3c4a43;  /* body                                         */
+  --muted:         #6b7872;  /* metadata                                     */
+  --line:          #e4e8e0;
+  --line-strong:   #cdd5c8;
+  --accent:        #2f5943;  /* brand green                                  */
+  --accent-soft:   #ecf1e8;  /* tinted surface                               */
+  --accent-ink:    #2a4f3c;  /* text on tinted surface                       */
+  --warn:          #a8622f;
+  --warn-soft:     #faf0e7;
+  --warn-ink:      #8a5227;
+  --data-1:        #6f8c66;  /* weights / primary series                     */
+  --data-2:        #7d9aab;  /* cache / secondary series                     */
+  --data-3:        #bfa878;  /* overhead / tertiary series                   */
+  --shadow: 0 1px 2px rgb(30 42 36 / 5%);
+
+  --serif: 'Newsreader Variable', Georgia, serif;
+}
+
+[data-theme='dark'] {
+  --bg:            #141c18;
+  --surface:       #1a241e;
+  --surface-sunk:  #161f1a;
+  --sidebar:       #17201b;
+  --ink:           #e6ece1;
+  --text:          #bcc9bb;
+  --muted:         #8b9a8b;
+  --line:          #2b3a31;
+  --line-strong:   #3c4f42;
+  --accent:        #a8c698;
+  --accent-soft:   #24332a;
+  --accent-ink:    #bcd6ab;
+  --warn:          #d9a172;
+  --warn-soft:     #33281f;
+  --warn-ink:      #e6b98f;
+  --data-1:        #7d9775;
+  --data-2:        #8aa5b3;
+  --data-3:        #bfae8c;
+  --shadow: none;
+}
+
+/* ============================================================================
+   Scoped refactor. Everything below applies only inside `.ds`, so one lesson
+   can adopt the system and be compared against the rest before propagation.
+   ========================================================================= */
+
+.ds {
+  font-size: var(--text-body);
+  line-height: var(--leading-prose);
+  color: var(--text);
+}
+
+/* ---- Reading column: measure is the point ------------------------------ */
+.ds .article { min-width: 0; }
+
+/* The rail was sized for 8px labels. At 14px it needs real width or every
+   entry wraps, which is worse than the small text it replaced.             */
+.ds .reading-layout {
+  grid-template-columns: minmax(0, 1fr) var(--rail-width);
+  gap: var(--space-7);
+  max-width: 76rem;
+}
+@media (max-width: 1200px) {
+  .ds .reading-layout { gap: var(--space-6); grid-template-columns: minmax(0, 1fr) 13.5rem; }
+}
+
+.ds .lesson-body > section > .section-body > p,
+.ds .page-description,
+.ds .section-summary,
+.ds .section-body > p {
+  font-size: var(--text-body);
+  line-height: var(--leading-prose);
+  color: var(--text);
+  margin: 0 0 var(--space-4);
+}
+.ds .section-body > p:last-child { margin-bottom: 0; }
+
+/* ---- Headings: hierarchy without domination ---------------------------- */
+.ds .article h1 {
+  font-family: var(--serif);
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.01em;
+  font-weight: var(--weight-medium);
+  color: var(--ink);
+  margin: 0 0 var(--space-3);
+  max-width: 20ch;
+}
+.ds .lesson-section h2 {
+  font-family: var(--serif);
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.005em;
+  font-weight: var(--weight-medium);
+  color: var(--ink);
+  margin: 0 0 var(--space-3);
+}
+.ds .page-description {
+  font-size: var(--text-md);
+  line-height: 1.55;
+  color: var(--text);
+  margin: 0 0 var(--space-4);
+}
+
+/* ---- Hero -------------------------------------------------------------
+   The decorative header illustration carried ~28 labels at 5–7px, competed
+   with the title, and took a third of the column at 768–1024. Its data also
+   appears as real content inside the lesson, so it is dropped rather than
+   enlarged. Not a marketing site.                                          */
+.ds .article-header.lesson-header { display: block; min-height: 0; }
+.ds .memory-art { display: none; }
+
+/* ---- Section rhythm ----------------------------------------------------- */
+.ds .lesson-section { margin: 0 0 var(--space-7); scroll-margin-top: var(--space-8); }
+.ds .lesson-section.folded { margin-bottom: var(--space-5); padding-bottom: var(--space-4); }
+.ds .section-label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.ds .section-label > span {
+  font-size: var(--text-xs);
+  letter-spacing: 0;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+.ds .section-heading { gap: var(--space-4); }
+.ds .section-summary { gap: var(--space-2); margin-top: var(--space-3); }
+.ds .section-summary li { font-size: var(--text-sm); line-height: var(--leading-snug); padding-left: var(--space-4); }
+.ds .section-summary li:before { top: 0.55em; width: 4px; height: 4px; background: var(--line-strong); }
+
+/* ---- Learning-content categories: type and rule, not eight card styles -- */
+.ds .key-idea {
+  background: none;
+  border: 0;
+  border-left: var(--border-accent);
+  border-radius: 0;
+  padding: var(--space-1) 0 var(--space-1) var(--space-4);
+  margin: var(--space-5) 0;
+  gap: var(--space-3);
+  max-width: var(--measure);
+}
+.ds .key-idea p { font-size: var(--text-base); line-height: var(--leading-snug); color: var(--text); }
+.ds .key-idea b { font-size: var(--text-base); font-weight: var(--weight-semi); color: var(--ink); }
+.ds .key-idea.warning { border-left-color: var(--warn); background: none; }
+.ds .key-idea.warning b { color: var(--warn-ink); }
+
+.ds .memory-parts { gap: var(--space-3); margin: var(--space-5) 0; }
+.ds .memory-part {
+  padding: var(--space-4);
+  border: var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.ds .memory-part h3 { font-size: var(--text-base); font-weight: var(--weight-semi); color: var(--ink); margin: 0 0 var(--space-2); }
+.ds .memory-part p { font-size: var(--text-sm); line-height: var(--leading-snug); color: var(--text); margin-bottom: var(--space-3); }
+.ds .memory-part > span { font-size: var(--text-xs); color: var(--muted); padding-top: var(--space-3); }
+
+/* ---- Equations: the legend is learning content, not a footnote --------- */
+.ds .math-block { margin: var(--space-5) 0; max-width: var(--measure-wide); }
+.ds .math-formula {
+  background: var(--surface-sunk);
+  border: var(--border);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  padding: var(--space-5) var(--space-4);
+  font-size: var(--text-md);
+}
+.ds .math-legend {
+  padding: var(--space-4);
+  gap: var(--space-3) var(--space-4);
+  border: var(--border);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  background: var(--surface);
+}
+.ds .math-legend dt { font-size: var(--text-base); color: var(--ink); }
+.ds .math-legend dd { font-size: var(--text-sm); line-height: var(--leading-snug); color: var(--text); }
+.ds .math-legend .legend-lead dt { font-size: var(--text-xs); letter-spacing: 0.06em; color: var(--muted); }
+.ds .math-note { font-size: var(--text-sm); line-height: var(--leading-snug); color: var(--muted); margin-top: var(--space-3); text-align: left; max-width: var(--measure); }
+.ds .section-body > p.caption,
+.ds .caption { font-size: var(--text-sm); color: var(--muted); text-align: left; max-width: var(--measure); }
+
+/* ---- Interactive panels ------------------------------------------------- */
+.ds .explorer {
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: none;
+  margin: var(--space-5) 0;
+  max-width: var(--measure-wide);
+}
+.ds .explorer-heading { padding: var(--space-3) var(--space-4); }
+.ds .explorer-heading > div { font-size: var(--text-sm); font-weight: var(--weight-semi); }
+.ds 
+.ds .explorer-controls { padding: var(--space-4); gap: var(--space-4); }
+.ds .explorer-controls > label { font-size: var(--text-sm); color: var(--text); }
+.ds .explorer select { font-size: var(--text-sm); height: 2.25rem; border-radius: var(--radius-sm); }
+.ds .range-label output { font-size: var(--text-base); }
+.ds .range-label output small,
+.ds .range-ticks small { font-size: var(--text-xs); }
+.ds .assumptions { padding: var(--space-4); font-size: var(--text-sm); line-height: var(--leading-snug); gap: var(--space-3); }
+.ds .assumptions p { margin-bottom: var(--space-2); }
+.ds .eyebrow { font-size: var(--text-xs); letter-spacing: 0.06em; }
+.ds .chart-title > span:first-child { font-size: var(--text-sm); font-weight: var(--weight-semi); }
+.ds .chart-title > span:last-child { font-size: var(--text-xs); letter-spacing: 0.04em; }
+.ds .bound-row strong { font-size: var(--text-2xl); }
+.ds .bound-row strong small { font-size: var(--text-sm); }
+.ds .bound-row .eyebrow { font-size: var(--text-xs); }
+
+/* ---- Explorer data: this is the worked example, not decoration --------- */
+.ds .ledger { padding: var(--space-4) 0 var(--space-1); margin-inline: var(--space-4); }
+.ds .ledger > .eyebrow { margin-bottom: var(--space-3); }
+.ds .ledger-row { padding: var(--space-2) 0; gap: var(--space-4); }
+.ds .ledger-row b { font-size: var(--text-base); font-weight: var(--weight-medium); color: var(--ink); }
+.ds .ledger-row small { font-size: var(--text-xs); color: var(--muted); margin-top: var(--space-1); }
+.ds .ledger-bytes { font-size: var(--text-md); }
+.ds .ledger-bytes small { font-size: var(--text-xs); }
+.ds .ledger-row.divide .ledger-bytes { font-size: var(--text-md); }
+.ds .bound-headline { margin-inline: var(--space-4); }
+.ds .bound-row { padding: var(--space-4) 0; gap: var(--space-4); }
+.ds .bound-row.unplaceable p { font-size: var(--text-sm); line-height: var(--leading-snug); }
+.ds .amortization, .ds .rate-ladder, .ds .weight-comparison, .ds .expert-grid-wrap,
+.ds .block-strip-wrap, .ds .hit-gap, .ds .goodput-panel, .ds .precision-view,
+.ds .speculate-view, .ds .placement-view, .ds .all-models, .ds .sim-stage { margin-inline: var(--space-4); }
+.ds .fan-legend, .ds .pool-legend, .ds .block-legend { font-size: var(--text-xs); gap: var(--space-4); }
+.ds .fan-picker button { font-size: var(--text-sm); padding: var(--space-2) 0; min-height: 2rem; }
+.ds .weight-row b, .ds .ladder-row b, .ds .model-row b { font-size: var(--text-sm); }
+.ds .weight-row small, .ds .ladder-row small, .ds .model-row small { font-size: var(--text-xs); }
+.ds .weight-row > span, .ds .ladder-row > span { font-size: var(--text-sm); }
+.ds .weight-comparison > p, .ds .rate-ladder > p, .ds .amortization > p,
+.ds .expert-grid-wrap > p, .ds .block-strip-wrap > p { font-size: var(--text-xs); line-height: var(--leading-snug); }
+.ds .explorer-foot { margin-inline: var(--space-4); padding: var(--space-3) 0; }
+.ds .explorer-foot label { font-size: var(--text-xs); }
+.ds .foot-note { font-size: var(--text-xs); }
+.ds .mini-code { font-size: var(--text-xs); }
+.ds .comparison-pair strong { font-size: var(--text-2xl); }
+.ds .comparison-pair strong small { font-size: var(--text-sm); }
+.ds .comparison-pair p { font-size: var(--text-sm); line-height: var(--leading-snug); }
+.ds .comparison-pair .eyebrow { font-size: var(--text-xs); }
+
+/* ---- Code and quoted source -------------------------------------------- */
+.ds .source-quote { border-radius: var(--radius-md); margin: var(--space-5) 0; }
+.ds .source-quote-head { font-size: var(--text-xs); padding: var(--space-3) var(--space-4); }
+.ds .source-quote pre { padding: var(--space-4); }
+.ds .source-quote code { font-size: var(--text-sm); line-height: 1.6; }
+.ds .source-quote > p { font-size: var(--text-sm); padding: var(--space-3) var(--space-4); }
+
+/* ---- Closing blocks ----------------------------------------------------- */
+.ds .takeaway { padding: var(--space-4); border-radius: var(--radius-md); gap: var(--space-3); max-width: var(--measure-wide); }
+.ds .takeaway h3 { font-size: var(--text-lg); margin-bottom: var(--space-2); }
+.ds .takeaway p { font-size: var(--text-base); line-height: var(--leading-snug); }
+.ds .decision-flow { gap: var(--space-2); margin: var(--space-4) 0; }
+.ds .decision-flow > span { font-size: var(--text-sm); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); }
+.ds .lesson-sources { margin-top: var(--space-6); }
+.ds .lesson-sources a { font-size: var(--text-sm); padding: var(--space-2) 0; }
+.ds .next-lesson { padding: var(--space-5); border-radius: var(--radius-md); margin-top: var(--space-7); }
+.ds .next-lesson h3 { font-size: var(--text-lg); margin: var(--space-2) 0; }
+.ds .next-lesson p { font-size: var(--text-sm); }
+
+/* ---- Page furniture ----------------------------------------------------- */
+.ds 
+.ds 
+.ds .kicker { font-size: var(--text-xs); letter-spacing: 0.06em; margin-bottom: var(--space-3); }
+.ds .article-meta { font-size: var(--text-sm); gap: var(--space-3); }
+.ds .article-header { margin-bottom: var(--space-6); }
+.ds .lesson-intent {
+  /* Holds only the fold control now, so it needs no rules or reserved row. */
+  display: flex;
+  justify-content: flex-end;
+  border: 0;
+  padding: 0;
+  margin: 0 0 var(--space-5);
+}
+.ds .section-control { font-size: var(--text-xs); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); }
+.ds 
+.ds .tab-strip button { font-size: var(--text-sm); padding: var(--space-3); }
+.ds .transport-events p { font-size: var(--text-sm); line-height: var(--leading-snug); }
+.ds .transport-step { font-size: var(--text-sm); }
+
+/* ---- Section rail: navigation must stay comfortably readable ----------- */
+.ds .page-rail { padding-top: var(--space-6); }
+.ds .toc > .eyebrow { font-size: var(--text-xs); letter-spacing: 0.06em; }
+.ds .toc nav { margin-top: var(--space-3); }
+.ds .toc-row > a {
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+  padding: var(--space-2) 0 var(--space-2) var(--space-3);
+  gap: var(--space-2);
+  color: var(--muted);
+}
+.ds .toc-row > a > span { font-size: var(--text-xs); opacity: 0.8; }
+.ds .toc-row.active > a { color: var(--accent); font-weight: var(--weight-semi); }
+.ds .toc-fold { padding: var(--space-1); }
+.ds .rail-source { font-size: var(--text-xs); gap: var(--space-2); padding: var(--space-2) 0; }
+
+/* ---- Touch targets ------------------------------------------------------ */
+.ds .section-toggle { width: 2rem; height: 2rem; border-radius: var(--radius-sm); }
+/* WCAG 2.5.8 target size: inline links and small controls need real height. */
+.ds .assumptions a,
+.ds .inline-link,
+.ds 
+.ds .text-button { font-size: var(--text-sm); padding: var(--space-2) var(--space-2); }
+.ds 
+.ds .save-button { font-size: var(--text-sm); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); min-height: 2rem; }
+
+/* ---- Responsive --------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .ds .article h1 { font-size: var(--text-xl); }
+  .ds .lesson-section h2 { font-size: var(--text-lg); }
+  .ds .page-description { font-size: var(--text-base); }
+}
+
+@media (max-width: 640px) {
+  .ds .section-body > p { font-size: var(--text-base); }
+  .ds .lesson-section { margin-bottom: var(--space-6); }
+  .ds .memory-parts { grid-template-columns: 1fr; }
+  .ds .math-formula { padding: var(--space-4) var(--space-3); font-size: var(--text-base); }
+}
+
+/* ============================================================================
+   Global navigation hierarchy (not .ds-scoped: this is app chrome).
+   The sidebar was persistent down to 760px, taking 29% of a 768px viewport and
+   squeezing prose to 58 characters. The skill requires secondary navigation to
+   collapse at narrower widths, so the drawer now starts at 1024px.
+   ========================================================================= */
+@media (min-width: 761px) and (max-width: 1024px) {
+  .mobile-menu { display: flex; }
+  /* The brand area is a fixed 218px column above 760px, which the hamburger
+     then overlaps. Lay it out as a row, as the phone breakpoint already does. */
+  .brand-area { width: auto; display: flex; align-items: center; gap: var(--space-3); }
+  .sidebar {
+    top: var(--topbar-height);
+    width: var(--sidebar-width);
+    transform: translateX(-100%);
+    transition: transform var(--motion-base) var(--ease);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-backdrop.visible {
+    display: block;
+    position: fixed;
+    inset: var(--topbar-height) 0 0;
+    background: rgb(19 42 37 / 25%);
+    z-index: 24;
+    backdrop-filter: blur(2px);
+  }
+  .workspace { margin-left: 0; }
+  .nav-collapse { display: none; }
+}
+
+/* ============================================================================
+   Propagation: markdown reference pages, the library, and the remaining
+   component internals. Same scale, same tokens.
+   ========================================================================= */
+
+/* ---- Markdown documents -------------------------------------------------- */
+.ds .prose { font-size: var(--text-body); line-height: var(--leading-prose); color: var(--text); }
+.ds .prose > .doc-section > .doc-body > p,
+.ds .prose > .doc-section > .doc-body > ul,
+.ds .prose > .doc-section > .doc-body > ol { max-width: var(--measure); }
+.ds .prose p, .ds .prose li { font-size: var(--text-body); line-height: var(--leading-prose); margin-bottom: var(--space-4); }
+.ds .prose li { margin-bottom: var(--space-2); }
+.ds .prose h2 {
+  font-family: var(--serif); font-size: var(--text-xl); line-height: var(--leading-tight);
+  font-weight: var(--weight-medium); color: var(--ink); margin: var(--space-7) 0 var(--space-3);
+}
+.ds .prose h3 { font-size: var(--text-lg); font-weight: var(--weight-semi); color: var(--ink); margin: var(--space-5) 0 var(--space-3); }
+.ds .prose code { font-size: 0.9em; }
+.ds .prose pre { padding: var(--space-4); border-radius: var(--radius-md); }
+.ds .prose pre code { font-size: var(--text-sm); line-height: 1.6; }
+.ds .prose table { font-size: var(--text-sm); }
+.ds .prose td, .ds .prose th { padding: var(--space-3); font-size: var(--text-sm); line-height: var(--leading-snug); }
+.ds .prose td code, .ds .prose th code { font-size: 0.92em; }
+.ds .prose blockquote { font-size: var(--text-body); }
+.ds .doc-section .section-summary li { font-size: var(--text-sm); }
+/* The preview stands in for the body; showing both duplicates the text. */
+.ds .doc-section:not(.folded) > .section-summary { display: none; }
+.ds .prose a { text-decoration-thickness: 1px; text-underline-offset: 2px; }
+
+/* ---- Library ------------------------------------------------------------- */
+.ds .library-page > h1 { font-size: var(--text-2xl); font-family: var(--serif); font-weight: var(--weight-medium); color: var(--ink); }
+.ds .filter-tabs button { font-size: var(--text-sm); padding: var(--space-2) var(--space-3); min-height: 2rem; border-radius: var(--radius-sm); }
+.ds .library-search input { font-size: var(--text-sm); }
+.ds .resource-count { font-size: var(--text-sm); color: var(--muted); }
+
+/* ---- Remaining component internals -------------------------------------- */
+.ds .pool-block small, .ds .device > small, .ds .draft-token small,
+.ds .spec-token small { font-size: var(--text-xs); }
+.ds .pool-block b { font-size: var(--text-base); }
+.ds .scenario-picker button { font-size: var(--text-sm); min-height: 2.25rem; padding: var(--space-2) var(--space-3); }
+.ds .symptom-grid button { padding: var(--space-3); }
+.ds .symptom-grid b { font-size: var(--text-base); }
+.ds .symptom-grid small { font-size: var(--text-xs); }
+.ds .hypothesis-head b { font-size: var(--text-base); }
+.ds .hypothesis-mechanism, .ds .hypothesis-test p { font-size: var(--text-sm); line-height: var(--leading-snug); }
+.ds .hypothesis-score { font-size: var(--text-xs); }
+.ds .checklist-row b { font-size: var(--text-base); }
+.ds .checklist-row p { font-size: var(--text-sm); line-height: var(--leading-snug); }
+.ds .checklist-n { font-size: var(--text-xs); }
+.ds .goodput-row { font-size: var(--text-sm); padding: var(--space-3); }
+.ds .goodput-verdict, .ds .goodput-index { font-size: var(--text-xs); }
+.ds .goodput-summary strong { font-size: var(--text-xl); }
+.ds .goodput-summary small { font-size: var(--text-xs); }
+.ds .lane-phase, .ds .lane-count { font-size: var(--text-xs); }
+.ds .lane-id { font-size: var(--text-xs); width: 1.5rem; height: 1.5rem; }
+.ds .lane-queue, .ds .scenario-explains, .ds .spec-phase-note,
+.ds .draft-caption, .ds .placement-note, .ds .strategy-note p,
+.ds .execution-note p, .ds .speculate-verdict p, .ds .chart-empty,
+.ds .differential-empty, .ds .differential-tie { font-size: var(--text-sm); line-height: var(--leading-snug); }
+.ds .model-verdict { font-size: var(--text-sm); }
+.ds .model-verdict small { font-size: var(--text-xs); }
+.ds .precision-row b { font-size: var(--text-sm); }
+.ds .precision-row small, .ds .precision-row > span { font-size: var(--text-xs); }
+.ds .all-models > p, .ds .goodput-panel > p, .ds .hit-gap > p { font-size: var(--text-xs); }
+.ds .section-control { min-height: 2rem; }
+.ds 
+
+@media (max-width: 640px) {
+  .ds .prose p, .ds .prose li { font-size: var(--text-base); }
+  .ds .prose h2 { font-size: var(--text-lg); }
+  .ds .prose h3 { font-size: var(--text-base); }
+}
+
+/* ---- Final stragglers ---------------------------------------------------- */
+/* The GH200 topology figure is a diagram built from markup, so it needs the
+   same floor as any other label. */
+.ds .topology-pair > div b { font-size: var(--text-base); }
+.ds .topology-pair > div span { font-size: var(--text-xs); }
+.ds .topology-link small { font-size: var(--text-xs); }
+.ds .topology-peer { font-size: var(--text-xs); }
+.ds .topology-diagram figcaption { font-size: var(--text-xs); }
+
+/* Inline links inside prose are the commonest small target in the app. */
+.ds .prose p a, .ds .prose li a, .ds .prose td a {
+  display: inline-block; min-height: 1.5rem; line-height: inherit;
+}
+
+/* Inline code inside tables landed at 12.88px, just under the floor. */
+.ds .prose td code, .ds .prose th code { font-size: 0.95em; }
+
+/* Empty pool slots label their state; it is still a label. */
+.ds .pool-block .free-label { font-size: var(--text-xs); }
+
+/* Explorer meter legends and per-model rows. */
+.ds .budget-legend > div { font-size: var(--text-xs); }
+.ds .budget-legend strong { font-size: var(--text-base); }
+.ds .budget-legend small { font-size: var(--text-xs); }
+.ds .budget-explanation { font-size: var(--text-sm); line-height: var(--leading-snug); }
+.ds .budget-value strong { font-size: var(--text-2xl); }
+.ds .budget-value > div > div > span { font-size: var(--text-base); }
+.ds .verdict { font-size: var(--text-xs); padding: var(--space-2); }
+.ds .range-ticks small { font-size: var(--text-xs); }
+.ds .spec-mark { font-size: var(--text-base); }
+
+/* ============================================================================
+   Craft pass: presence without decoration.
+   The page read as unstyled documentation. These changes add confidence
+   through type, rhythm and layered surface — not through chrome.
+   ========================================================================= */
+
+/* ---- A real reading rhythm ---------------------------------------------- */
+.ds .workspace { padding-top: var(--space-6); }
+.ds .lesson-section { margin-bottom: var(--space-8); }
+.ds .lesson-section + .lesson-section { padding-top: var(--space-2); }
+
+/* Section numbers become a structural device rather than a badge: the number
+   sits in the margin, the label runs as a rule across the column. */
+.ds .section-label {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  text-transform: uppercase;
+}
+.ds .section-label > span {
+  font-family: var(--serif);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-normal);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  padding: 0;
+  background: none;
+  color: var(--line-strong);
+  letter-spacing: -0.02em;
+}
+.ds .section-label::after {
+  content: '';
+  height: 1px;
+  background: var(--line);
+}
+
+/* ---- Headings carry the weight ------------------------------------------ */
+.ds .article h1 { letter-spacing: -0.022em; }
+.ds .lesson-section h2 { letter-spacing: -0.018em; }
+.ds .kicker { color: var(--accent); font-weight: var(--weight-semi); }
+
+/* Optical detail: tabular figures everywhere a number can change. */
+.ds .bound-row strong, .ds .ledger-bytes, .ds .budget-value strong,
+.ds .goodput-summary strong, .ds .transport-step, .ds .model-verdict,
+.ds .weight-row > span, .ds .ladder-row > span { font-variant-numeric: tabular-nums; }
+
+/* ---- Surfaces: depth by layering, not by shadow -------------------------- */
+.ds .explorer { background: var(--surface); border-color: var(--line-strong); }
+.ds .explorer-heading { background: var(--surface-sunk); border-bottom-color: var(--line); }
+.ds .assumptions { background: var(--surface-sunk); }
+.ds .math-formula { background: var(--surface-sunk); }
+
+/* The takeaway is the one place per chapter allowed real presence. */
+.ds .takeaway {
+  background: var(--accent-soft);
+  border: 0;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: var(--space-5);
+}
+.ds .takeaway h3 { color: var(--accent-ink); font-family: var(--serif); }
+
+/* ---- The next-chapter handoff: a real destination ------------------------ */
+.ds .next-lesson {
+  background: var(--surface-sunk);
+  border: var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5) var(--space-6);
+}
+.ds .next-lesson h3 { font-family: var(--serif); color: var(--ink); }
+.ds .next-lesson .eyebrow { color: var(--accent); }
+
+/* ---- Quieter chrome so the content carries the page --------------------- */
+.ds 
+.ds 
+.ds .decision-flow > span { background: var(--surface-sunk); border: var(--border); color: var(--text); }
+
+/* ---- Focus: visible, and on the system ---------------------------------- */
+.ds :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: var(--radius-sm); }
+
+/* ---- Concrete decode walkthrough ---------------------------------------- */
+.ds .phase-rail {
+  display: flex; gap: var(--space-1); list-style: none;
+  margin: 0; padding: var(--space-4) var(--space-4) 0;
+}
+.ds .phase-rail li {
+  flex: 1; padding: var(--space-2) var(--space-3);
+  border-top: 2px solid var(--line); min-width: 0;
+}
+.ds .phase-rail li.active { border-top-color: var(--accent); }
+.ds .phase-rail li.past { border-top-color: var(--line-strong); }
+.ds .phase-rail b { display: block; font-size: var(--text-sm); color: var(--muted); font-weight: var(--weight-medium); }
+.ds .phase-rail li.active b { color: var(--accent); font-weight: var(--weight-semi); }
+.ds .phase-rail li.past b { color: var(--text); }
+.ds .phase-rail small { display: block; font-size: var(--text-xs); color: var(--muted); margin-top: 2px; }
+
+.ds .walk-stage { padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-5); }
+.ds .walk-row { display: grid; grid-template-columns: 7.5rem 1fr; gap: var(--space-4); align-items: start; }
+.ds .walk-label {
+  font-size: var(--text-xs); letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--muted); padding-top: 0.35rem;
+}
+.ds .walk-label small { display: block; text-transform: none; letter-spacing: 0; margin-top: 2px; opacity: 0.85; }
+.ds .walk-muted { font-size: var(--text-sm); color: var(--muted); margin: 0; padding-top: 0.35rem; }
+.ds .walk-prompt { font-family: var(--serif); font-size: var(--text-md); color: var(--ink); margin: 0; }
+.ds .walk-output {
+  font-family: var(--serif); font-size: var(--text-md); color: var(--ink); margin: 0;
+  background: var(--accent-soft); border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3); display: inline-block;
+}
+.ds .caret {
+  display: inline-block; width: 2px; height: 1.05em; margin-left: 2px;
+  vertical-align: -0.15em; background: var(--accent);
+}
+
+.ds .token-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.ds .token {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--text-sm); padding: var(--space-1) var(--space-2);
+  border: var(--border); border-radius: var(--radius-sm);
+  background: var(--surface-sunk); color: var(--text); white-space: pre;
+}
+
+.ds .kv-blocks { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.ds .kv-block { border: var(--border); border-radius: var(--radius-md); padding: var(--space-2); background: var(--surface-sunk); }
+.ds .kv-block-index { display: block; font-size: var(--text-xs); color: var(--muted); margin-bottom: var(--space-2); }
+.ds .kv-slots { display: flex; gap: var(--space-1); }
+.ds .kv-slot {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--text-xs); min-width: 3.25rem; min-height: 2rem;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 var(--space-2); border-radius: var(--radius-sm);
+  border: 1px dashed var(--line-strong); color: var(--muted); white-space: pre;
+}
+.ds .kv-slot.prompt { background: var(--data-2); border-style: solid; border-color: var(--data-2); color: #fff; }
+.ds .kv-slot.output { background: var(--accent); border-style: solid; border-color: var(--accent); color: var(--bg); }
+.ds .kv-slot.empty { background: none; }
+
+.ds .walk-ledger { display: flex; gap: var(--space-6); padding: var(--space-3) 0 0; border-top: var(--border); }
+.ds .walk-ledger .eyebrow { display: block; font-size: var(--text-xs); margin-bottom: var(--space-1); }
+.ds .walk-ledger strong { font-family: var(--serif); font-size: var(--text-xl); color: var(--ink); font-variant-numeric: tabular-nums; }
+.ds .walk-ledger small { font-size: var(--text-xs); color: var(--muted); margin-left: var(--space-2); }
+.ds .walk-caption { font-size: var(--text-sm); line-height: var(--leading-snug); color: var(--text); margin: 0; padding-top: var(--space-3); border-top: var(--border); }
+
+@media (max-width: 640px) {
+  .ds .phase-rail { flex-wrap: wrap; }
+  .ds .phase-rail li { flex: 1 1 5.5rem; }
+  .ds .walk-row { grid-template-columns: 1fr; gap: var(--space-2); }
+  .ds .kv-slot { min-width: 2.75rem; }
+}
+
+/* ---- Speculation: the accumulating output strip -------------------------- */
+.ds .spec-output {
+  margin-top: var(--space-4); padding-top: var(--space-4);
+  border-top: var(--border);
+  display: grid; grid-template-columns: 8.5rem 1fr; gap: var(--space-4); align-items: start;
+}
+@media (max-width: 640px) { .ds .spec-output { grid-template-columns: 1fr; gap: var(--space-2); } }
+
+/* ============================================================================
+   App chrome: the masthead and sidebar sit outside `.ds`, so the system never
+   reached them. Group headings were 8px (effectively invisible), nav links
+   11.5px, and the footer label carried a stray auto margin.
+   ========================================================================= */
+
+/* ---- Sidebar ------------------------------------------------------------- */
+.sidebar { width: var(--sidebar-width); padding: var(--space-5) var(--space-3) 0; }
+.sidebar-caption {
+  padding: 0 var(--space-2);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: var(--space-5);
+  align-items: center;
+}
+.sidebar-caption 
+
+.nav-group { margin-bottom: var(--space-5); }
+.nav-group h2 {
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  font-weight: var(--weight-semi);
+  color: var(--muted);
+  padding: 0 var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.nav-group a {
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-2);
+  margin: 1px 0;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  min-height: 2.25rem;
+}
+.nav-group a > svg { stroke-width: 1.6; color: var(--muted); }
+.nav-group a:hover { background: var(--surface-sunk); color: var(--accent); }
+.nav-group a:hover > svg { color: var(--accent); }
+.nav-group a.active { background: var(--accent-soft); color: var(--accent-ink); font-weight: var(--weight-semi); }
+.nav-group a.active > svg { color: var(--accent); }
+.active-dot { width: 5px; height: 5px; background: var(--accent); }
+
+.sidebar-bottom { padding: var(--space-3) var(--space-2) var(--space-4); border-top: var(--border); }
+.sidebar-link {
+  font-size: var(--text-sm);
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  min-height: 2.25rem;
+}
+/* The label must sit next to its icon; only the count is pushed right. */
+.sidebar-link > span { margin-left: 0; }
+.sidebar-link > em { margin-left: auto; font-style: normal; font-size: var(--text-xs); }
+.sidebar-link:hover { background: var(--surface-sunk); color: var(--accent); }
+
+/* ---- Masthead ------------------------------------------------------------ */
+.topbar { height: var(--topbar-height); padding: 0 var(--space-5); border-bottom: var(--border); }
+.brand small { font-size: var(--text-xs); letter-spacing: 0.08em; margin-top: var(--space-2); color: var(--muted); }
+.topnav { font-size: var(--text-sm); gap: var(--space-5); }
+.topnav > a { color: var(--muted); }
+.topnav > a.active { color: var(--accent); font-weight: var(--weight-semi); }
+.topnav > a.active:after { background: var(--accent); }
+.topnav a > span { font-size: var(--text-xs); background: var(--accent-soft); color: var(--accent-ink); border-radius: var(--radius-sm); padding: 1px var(--space-2); }
+.search-trigger {
+  font-size: var(--text-sm);
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  min-height: 2.25rem;
+  color: var(--muted);
+}
+.search-trigger kbd { font-size: var(--text-xs); border-radius: var(--radius-sm); padding: 1px var(--space-1); }
+.icon-button { padding: var(--space-2); border-radius: var(--radius-sm); min-width: 2.25rem; min-height: 2.25rem; }
+.icon-button:hover { background: var(--surface-sunk); color: var(--accent); }
+.nav-collapse { width: 1.75rem; height: 1.75rem; }
+
+/* ---- Search dialog ------------------------------------------------------- */
+.search-input-row input { font-size: var(--text-body); }
+.search-results b { font-size: var(--text-base); }
+.search-results p { font-size: var(--text-sm); line-height: var(--leading-snug); }
+.search-label, .search-footer { font-size: var(--text-xs); }
+.empty-search h3 { font-size: var(--text-lg); }
+.empty-search p { font-size: var(--text-sm); }
+
+/* Collapsed rail keeps its own sizing. */
+[data-nav=collapsed] .nav-group h2 { display: none; }
+[data-nav=collapsed] .sidebar-link > span,
+[data-nav=collapsed] .sidebar-link > em { display: none; }
+
+
+/* ---- Softer geometry ----------------------------------------------------
+   Large surfaces take --radius-lg, controls --radius-md, chips --radius-sm,
+   so nothing is a hard rectangle and the scale stays legible.              */
+.ds .source-quote,
+.ds .next-lesson,
+.ds .takeaway,
+.ds .memory-part,
+.ds .rate-ladder,
+.ds .weight-comparison,
+.ds .hypothesis,
+.ds .kv-block,
+.ds .math-formula { border-radius: var(--radius-lg); }
+
+.ds .math-formula { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.ds .math-legend { border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+.ds .takeaway { border-radius: 0 var(--radius-lg) var(--radius-lg) 0; }
+.ds .explorer-heading { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.ds .assumptions { border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+.ds .source-quote-head { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+
+.ds .save-button,
+.ds .section-control,
+.ds .text-button,
+.ds .tab-strip button,
+.ds .fan-picker button,
+.ds .scenario-picker button,
+.ds .filter-tabs button,
+.ds .symptom-grid button,
+.ds .section-toggle,
+.ds .explorer select,
+.ds .transport-buttons button,
+.ds .goodput-row,
+.ds .execution-note,
+.ds .speculate-verdict,
+.ds .placement-warning,
+.ds .differential-tie,
+.ds .walk-output,
+.ds .spec-mark,
+.ds .device-fill,
+.ds .pool-block { border-radius: var(--radius-md); }
+
+.ds .token,
+.ds .kv-slot,
+.ds .decision-flow > span,
+.ds .section-label > span,
+.ds .lane-id,
+.ds .expert-grid > i { border-radius: var(--radius-sm); }
+
+/* Meter fills follow their track rather than squaring off inside it. */
+.ds .weight-track, .ds .ladder-track, .ds .lane-track, .ds .budget-meter,
+.ds .model-meter, .ds .ledger-bar, .ds .stream-strip > i,
+.ds .weight-track > span, .ds .ladder-track > span,
+.ds .ledger-bar > span, .ds .model-meter > span { border-radius: var(--radius-pill); }
+
+/* Chrome */
+.sidebar-link, .nav-group a, .search-trigger, .icon-button,
+.nav-collapse, .toc-fold, .fan-picker button { border-radius: var(--radius-md); }
+.search-dialog { border-radius: var(--radius-lg); }
+.toc-sheet { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.search-results > a, .result-icon { border-radius: var(--radius-md); }
+
+/* The meta row now carries both controls. */
+.ds .article-meta { flex-wrap: wrap; gap: var(--space-3); }
+.ds .article-meta .save-button { margin-left: auto; }
+.ds .article-meta .section-control { margin-left: 0; }
+
+/* The two meta controls are a pair, so they share a size and a shape. */
+.ds .article-meta .save-button,
+.ds .article-meta .section-control {
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-4);
+  min-height: 2.25rem;
+  border: var(--border);
+  background: var(--surface);
+  color: var(--text);
+  gap: var(--space-2);
+}
+.ds .article-meta .save-button:hover,
+.ds .article-meta .section-control:hover { border-color: var(--line-strong); color: var(--accent); }
+.ds .article-meta .save-button.saved { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
