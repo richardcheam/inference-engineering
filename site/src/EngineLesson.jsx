@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowRight, ArrowUpRight, FileCode2 } from 'lucide-react';
+import Sequence from './Sequence';
 import LessonSection from './LessonSection';
 import PrefixExplorer from './PrefixExplorer';
 import EngineAnimation from './EngineAnimation';
@@ -97,7 +98,11 @@ max_cache_hit_length = request.num_tokens - 1`}</code></pre>
       'The improvement should be time-to-first-token, not throughput.',
     ]}>
       <p>The experiment that checks all of this is small. Take one prompt, send it against a cold cache, then send the identical tokenized content again. The prediction is specific: time-to-first-token improves, output throughput barely moves, and the improvement is smaller than the hit rate implies by roughly one block of prefill.</p>
-      <div className="decision-flow"><span>Same tokens</span><ArrowRight/><span>Cold cache</span><ArrowRight/><span>Warm cache</span><ArrowRight/><span>Compare TTFT</span></div>
+      <Sequence label="The experiment" steps={[
+        { name: 'Same prompt',  question: 'Hold the input fixed.',       detail: 'one request, unchanged' },
+        { name: 'Cold cache',   question: 'Nothing has been seen.',      detail: 'full prefill · baseline TTFT' },
+        { name: 'Warm cache',   question: 'What did the hit save?',      detail: 'reported hit · recomputed tail' },
+      ]}/>
       <div className="takeaway"><div><h3>The engineering habit</h3><p>When a metric and a mechanism disagree, read the allocator. Serving behaviour that looks mysterious from the outside is usually documented in the code that manages the memory.</p></div></div>
       <div className="lesson-sources">
         <span className="eyebrow">EVIDENCE BEHIND THIS LESSON</span>

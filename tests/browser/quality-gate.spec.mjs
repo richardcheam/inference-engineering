@@ -137,10 +137,21 @@ test.describe('composition', () => {
     await page.waitForSelector('.key-idea');
     const m = await page.evaluate(() => {
       const px = s => { const e = document.querySelector(s); return e ? Math.round(e.getBoundingClientRect().width) : null; };
-      return { prose: px('.section-body > p'), callout: px('.key-idea'), takeaway: px('.takeaway') };
+      const indent = () => {
+        const t = document.querySelector('.takeaway'), a = document.querySelector('.article');
+        return t ? Math.round(t.getBoundingClientRect().left - a.getBoundingClientRect().left) : 0;
+      };
+      return { prose: px('.section-body > p'), callout: px('.key-idea'),
+               takeaway: px('.takeaway'), takeawayIndent: indent() };
     });
     expect(m.callout, `callout ${m.callout} vs prose ${m.prose}`).toBe(m.prose);
-    if (m.takeaway) expect(m.takeaway, `takeaway ${m.takeaway} vs prose ${m.prose}`).toBe(m.prose);
+    // The takeaway is the exception, and deliberately so: module 14 §30 asks
+    // for the conclusion to be set apart rather than run to the same edge as
+    // the argument, so on a wide track it is narrower and steps in.
+    if (m.takeaway) {
+      expect(m.takeaway, `takeaway ${m.takeaway} vs prose ${m.prose}`).toBeLessThan(m.prose);
+      expect(m.takeawayIndent, 'the conclusion is not set apart').toBeGreaterThan(100);
+    }
   });
 
   test('the hero and the body share a column edge below the split', async ({ page }) => {

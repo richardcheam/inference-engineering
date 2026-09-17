@@ -12,6 +12,7 @@ import './home.css';
 import './scene.css';
 import './canvas.css';
 import './playback.css';
+import './sequence.css';
 import App from './App';
 import ErrorBoundary from './ErrorBoundary';
 

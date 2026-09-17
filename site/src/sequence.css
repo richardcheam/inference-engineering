@@ -1,0 +1,139 @@
+/* ============================================================================
+   Editorial sequences — module 14
+
+   Replaces `A → B → C`. The arrow was doing all the visual work and the gaps
+   between the labels held no information (§20). Here the rule carries the
+   progression, position carries direction, and each stop says what it is and
+   what it answers.
+   ========================================================================= */
+
+.ds .sequence { margin: var(--space-7, 3rem) 0; }
+
+.ds .sequence-label {
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--space-5, 1.5rem);
+}
+
+.ds .sequence-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--steps, 4), minmax(0, 1fr));
+  column-gap: var(--col-gap, 2rem);
+}
+
+/* The rule runs along the top of each stop, with a stop mark on it. Together
+   they read as one continuous line through the sequence. */
+/* One rule through the whole sequence, not a rule per column: the line is the
+   progression, and breaking it at every gutter would make four things where
+   there is one (§5, grammar B). */
+.ds .sequence-steps { position: relative; padding-top: var(--space-5, 1.5rem); }
+.ds .sequence-steps::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--rule-strong);
+}
+.ds .sequence-steps > li {
+  position: relative;
+  min-width: 0;
+}
+.ds .sequence-steps > li::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--space-5, 1.5rem) * -1 - 0.21875rem);
+  left: 0;
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 50%;
+  background: var(--ink);
+}
+/* §19: colour appears at the changed state, not on every stop. */
+.ds .sequence-steps > li.emphasis::before { background: var(--warning); }
+.ds .sequence-steps > li.emphasis .sequence-name { color: var(--warning); }
+
+.ds .sequence-number {
+  display: block;
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: var(--space-3, 0.75rem);
+}
+
+.ds .sequence-name {
+  display: block;
+  font-family: var(--mono);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.ds .sequence-question {
+  display: block;
+  margin-top: var(--space-3, 0.75rem);
+  font-size: var(--text-base);
+  line-height: var(--leading-snug);
+  color: var(--text);
+}
+
+.ds .sequence-detail {
+  display: block;
+  margin-top: var(--space-2, 0.5rem);
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+/* §22 The consequence is set apart, because it is not another step. */
+.ds .sequence-conclusion {
+  margin: var(--space-6, 2rem) 0 0;
+  padding-top: var(--space-4, 1rem);
+  border-top: 1px solid var(--rule);
+  font-size: var(--text-base);
+  line-height: var(--leading-prose);
+  color: var(--text);
+  max-inline-size: 52ch;
+  margin-left: auto;
+}
+
+/* §27 Responsive transformation: the relationship survives, the desktop
+   geometry does not. Below this width the sequence becomes a vertical chain,
+   with the rule running down the side instead of across the top. */
+@media (max-width: 52rem) {
+  .ds .sequence-steps {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--space-5, 1.5rem);
+  }
+  .ds .sequence-steps { padding-top: 0; }
+  .ds .sequence-steps::before { display: none; }
+  .ds .sequence-steps > li {
+    border-left: 1px solid var(--rule-strong);
+    padding: 0 0 0 var(--space-5, 1.5rem);
+  }
+  .ds .sequence-steps > li::before { top: 0.35rem; left: -0.25rem; }
+  .ds .sequence-conclusion { margin-left: 0; }
+}
+
+/* §30 The engineering habit reads as a conclusion, not another full-width
+   callout: on a wide track it steps in from the left and takes less room,
+   so the eye registers it as the end of the argument. */
+@media (min-width: 64rem) {
+  /* Matched at `.ds .article .takeaway`, because the adaptive layer sets the
+     reading measure at that specificity and would otherwise win. */
+  .ds .article .takeaway {
+    margin-left: auto;
+    max-inline-size: 46ch;
+  }
+}

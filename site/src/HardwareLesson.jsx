@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import BandwidthExplorer from './BandwidthExplorer';
+import Sequence from './Sequence';
 import LessonSection from './LessonSection';
 import { MathFormula } from './Lesson';
 
@@ -119,7 +120,12 @@ export default function HardwareLesson() {
       'Predict the number before running anything; the gap to the measurement is the lesson.',
     ]}>
       <p>Everything on this page is arithmetic over advertised numbers. It is useful for exactly one thing: telling you which resource to suspect, and by roughly how much, before you have hardware. A step that comes in near the bound tells you the model of the machine was about right. A step that comes in far above it is the interesting case, and the beginning of the next investigation.</p>
-      <div className="decision-flow"><span>Capacity</span><ArrowRight/><span>Rate bound</span><ArrowRight/><span>Compatibility</span><ArrowRight/><span>Measurement</span></div>
+      <Sequence label="The investigation" steps={[
+        { name: 'Capacity',      question: 'What can fit?',          detail: 'weights · cache · execution' },
+        { name: 'Rate bound',    question: 'What is possible?',      detail: 'bytes per step · bandwidth' },
+        { name: 'Compatibility', question: 'Can it actually run?',   detail: 'kernels · precision · topology' },
+        { name: 'Measurement',   question: 'What happened?',         detail: 'timestamps · profiles · traces' },
+      ]}/>
       <div className="takeaway"><div><h3>The engineering habit</h3><p>Predict the bound before you run anything. Write the number down. The gap between that number and the measurement is where the real understanding of the system lives.</p></div></div>
       <div className="lesson-sources">
         <span className="eyebrow">EVIDENCE BEHIND THIS LESSON</span>
