@@ -34,14 +34,20 @@ jobs:
 
       # The calculation and simulation modules are what every figure on the
       # site reports, so a deploy that fails them would publish wrong numbers.
-      # The browser suite is deliberately not run here: it drives the installed
-      # Chrome, which a runner does not have, and it guards layout rather than
-      # correctness.
       - name: Unit tests
         run: npm test
 
       - name: Build
         run: npm run build
+
+      # The layout, material and playback rules, run against the real build.
+      # Chromium rather than Chrome: a runner has no Chrome, and the config
+      # switches to the bundled browser when CI is set.
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser tests
+        run: npm run test:browser
 
       # `enablement: true` was here and is what failed the first run: creating a
       # Pages site needs more than GITHUB_TOKEN carries, so it returned
