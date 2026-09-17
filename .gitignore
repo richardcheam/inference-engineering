@@ -17,3 +17,8 @@ playwright-report/
 
 .playwright-mcp/
 .audit/
+
+# Agent development harness: design briefs, skill packs and prompt material.
+# Local only. These shape how the site was built; they are not part of it.
+harness/
+.claude/
