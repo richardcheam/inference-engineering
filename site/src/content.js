@@ -24,7 +24,7 @@ export const documents = [
   { id: 'decisions', title: 'Why we chose this approach', short: 'Decision notes', category: 'Notebook', path: 'DECISIONS.md', text: decisions, description: 'The choices behind this learning workspace and the evidence that would change them.', icon: 'notebook', time: '5 min' },
   { id: 'queue', title: 'Questions worth investigating', short: 'Investigation queue', category: 'Notebook', path: 'experiments/QUEUE.md', text: queue, description: 'A small, ordered set of engineering questions, including what needs real hardware.', icon: 'list', time: '4 min' },
   { id: 'sources', title: 'Follow the evidence', short: 'Source registry', category: 'Reference', path: 'research/sources/2026-09-15/README.md', text: sources, description: 'Pinned model configurations, tensor indices, and engine source references behind the notes.', icon: 'file', time: '5 min' },
-  { id: 'about', title: 'An atlas for inference engineering', short: 'About this workspace', category: 'Reference', path: 'README.md', text: introduction, description: 'The purpose, scope, and evidence rules for this personal learning resource.', icon: 'info', time: '3 min' },
+  { id: 'about', title: 'A field guide to inference engineering', short: 'About this workspace', category: 'Reference', path: 'README.md', text: introduction, description: 'The purpose, scope, and evidence rules for this personal learning resource.', icon: 'info', time: '3 min' },
   { id: 'skills', title: 'Engineering capabilities', short: 'Capability reference', category: 'Reference', path: 'SKILL_MATRIX.md', text: skills, description: 'A planning reference for the capabilities involved in independent inference engineering.', icon: 'compass', time: '4 min' },
 ];
 

@@ -449,3 +449,11 @@ body,
   color: var(--efficient);
   box-shadow: inset 0 -1px 0 var(--efficient);
 }
+
+/* The brand column was pinned to 218px so the masthead mirrored the sidebar
+   panel beneath it. That panel is gone, and "inference engineering" is wider
+   than the wordmark it replaced: the text overflowed the column by 20px and
+   pushed the tagline into the navigation. Nothing needs the column to be a
+   fixed width any more. */
+.brand-area { width: auto; }
+.brand { min-width: 0; }

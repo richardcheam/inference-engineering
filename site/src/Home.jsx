@@ -12,7 +12,7 @@ import DecodeWalkthrough from './DecodeWalkthrough';
 export default function Home() {
   return <div className="home">
     <header className="home-hero">
-      <span className="kicker">INFERENCE ATLAS</span>
+      <span className="kicker">INFERENCE ENGINEERING</span>
       <h1>
         <span>A model either fits, or it doesn’t.</span>
         <span>Then it’s fast enough, or it isn’t.</span>

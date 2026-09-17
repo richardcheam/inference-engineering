@@ -7,7 +7,7 @@ import React from 'react';
 export default class ErrorBoundary extends React.Component {
   state = { error: null };
   static getDerivedStateFromError(error) { return { error }; }
-  componentDidCatch(error, info) { console.error('Inference Atlas failed to render', error, info); }
+  componentDidCatch(error, info) { console.error('Inference Engineering failed to render', error, info); }
 
   render() {
     if (!this.state.error) return this.props.children;

@@ -13,7 +13,7 @@ Build the ability to take an unfamiliar open-weight model from architecture to a
 
 ## Read it in the browser
 
-The material is also a local study site, `Inference Atlas`, built from these same Markdown files.
+The material is also a local study site, `Inference Engineering`, built from these same Markdown files.
 
 ```
 npm install          # once
