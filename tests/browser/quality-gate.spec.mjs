@@ -1228,6 +1228,24 @@ test.describe('the masthead says where you are, not what you can click', () => {
     expect(m.bg, 'the Field Guide paints its own background').toMatch(/rgba\(0, 0, 0, 0\)|transparent/);
     expect(m.shadow, 'the Field Guide floats').toBe('none');
     expect(m.border, 'the Field Guide is a vertical wall').toBe('0px');
+
+    // The lesson itself is marked by type and a gutter dot, not by a block of
+    // colour — in both themes. The dark palette used to re-fill it.
+    for (const theme of ['light', 'dark']) {
+      await page.evaluate(t => { document.documentElement.dataset.theme = t; }, theme);
+      await page.waitForTimeout(150);
+      const filled = await page.evaluate(() => {
+        const painted = e => {
+          const bg = getComputedStyle(e).backgroundColor;
+          return bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent';
+        };
+        const active = document.querySelector('#sidebar-nav a.active');
+        active.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+        return [...document.querySelectorAll('#sidebar-nav a')].filter(painted).length;
+      });
+      expect(filled, `a lesson is a filled block in ${theme}`).toBe(0);
+    }
+    await page.evaluate(() => { document.documentElement.dataset.theme = 'light'; });
   });
 
   test('the Index reveals the product and does not repeat the curriculum', async ({ page }) => {

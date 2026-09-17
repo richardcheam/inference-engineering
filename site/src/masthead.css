@@ -232,3 +232,15 @@
 }
 .sidebar { top: var(--topbar-height); }
 .sidebar-backdrop.visible { top: var(--topbar-height); }
+
+/* ---- §7: the Field Guide is revealed, not walled off --------------------- */
+/* The dark palette re-filled the active and hovered lesson from a selector one
+   step more specific than the one-canvas rule, so the curriculum came back as
+   a block of colour. Typography and the gutter marker carry it in both themes. */
+[data-theme='dark'] .nav-group a.active,
+[data-theme='dark'] .nav-group a:hover,
+[data-theme='dark'][data-nav='collapsed'] .nav-group a.active { background: none; }
+[data-theme='dark'] .nav-group a:hover { color: var(--ink); }
+[data-theme='dark'] .nav-group a.active { color: var(--identity); }
+[data-theme='dark'][data-nav='collapsed'] .nav-group a.active { box-shadow: inset 2px 0 0 var(--identity); }
+[data-theme='dark'] .sidebar-bottom { background: none; }
