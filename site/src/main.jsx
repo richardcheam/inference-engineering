@@ -14,6 +14,7 @@ import './canvas.css';
 import './playback.css';
 import './sequence.css';
 import './masthead.css';
+import './search.css';
 import App from './App';
 import ErrorBoundary from './ErrorBoundary';
 

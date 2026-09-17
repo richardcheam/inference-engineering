@@ -1,0 +1,298 @@
+/* ============================================================================
+   The search overlay — warm frosted paper above an editorial publication
+
+   The audit found the panel had no fill at all. `.search-dialog` asks for
+   `var(--surface)`, and the one-canvas layer remaps `--surface: transparent`,
+   because a *region* of the page must never paint its own material. The search
+   panel is not a region; it is a contained object held above the page, and it
+   is the one place in this system that needs a material of its own.
+
+   The governing rule, and the reason the fix is not "make it opaque":
+
+     Transparency belongs to the material, never to the information.
+
+   So the sheet is translucent and the ink on it is not. The blur lives on
+   ::backdrop alone — one bounded, composited, viewport-sized surface — and the
+   panel reads it through its own warm fill, which keeps this to a single
+   expensive effect rather than two stacked ones.
+   ========================================================================= */
+
+:root {
+  /* Tuned by screenshot against 60px display type underneath, which is the
+     hardest case in the publication. Below ~0.86 the headline still reads
+     through; above ~0.92 the page stops being perceptible at all. */
+  --search-sheet: rgb(246 244 236 / 88%);
+  --search-scrim: rgb(52 44 24 / 22%);   /* warm, not a grey wash             */
+  --search-blur: 22px;
+}
+
+/* ---- 1. The page recedes ------------------------------------------------- */
+/* Structure stays perceptible; sentences stop competing. The slight
+   desaturation is what stops the warm page glowing through the warm sheet. */
+.search-dialog::backdrop {
+  background: var(--search-scrim);
+  /* Desaturating the page was tried at 0.82 and 0.88: both turned the warm
+     publication into a grey cloud, which is the failure §8 warns about. The
+     separation comes from the blur and a warm scrim, so the hue can stay. */
+  backdrop-filter: blur(var(--search-blur));
+  -webkit-backdrop-filter: blur(var(--search-blur));
+}
+
+/* ---- 2. The sheet -------------------------------------------------------- */
+.search-dialog {
+  background: var(--search-sheet);
+  border: 1px solid rgb(20 20 20 / 8%);
+  /* §17: depth comes from the material and from foreground sharpness. One
+     very broad, very diffuse ambient pool, not a modal drop shadow. */
+  box-shadow: 0 40px 120px -40px rgb(28 30 22 / 28%);
+  color: var(--graphite);
+}
+
+/* Where backdrop-filter is unavailable, the sheet carries the separation
+   itself rather than leaving the page legible underneath (§29). */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .search-dialog { background: rgb(244 242 235 / 98%); }
+  .search-dialog::backdrop { background: rgb(34 32 24 / 52%); }
+}
+
+/* A reader who has asked for less transparency gets the information, not the
+   effect. */
+@media (prefers-reduced-transparency: reduce) {
+  .search-dialog { background: rgb(244 242 235 / 99%); }
+  .search-dialog::backdrop { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+}
+
+/* ---- 3. The search line: editorial surface, not a form field ------------- */
+.search-input-row {
+  padding: var(--space-5, 1.5rem) var(--space-6, 2rem);
+  border-bottom: 1px solid var(--rule);
+  color: var(--muted);
+  gap: var(--space-4, 1rem);
+}
+.search-input-row > svg { color: var(--identity); opacity: 0.75; }
+.search-dialog .search-input-row input {
+  font-size: var(--text-md);
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+/* §10: quieter than entered text, and still comfortably readable. */
+.search-dialog .search-input-row input::placeholder {
+  /* Measured on the composited sheet: 52% gave 3.57:1, below AA for text this
+     size. 62% reads as a prompt, not as entered text, and clears 4.5:1. */
+  color: rgb(20 20 20 / 62%);
+  opacity: 1;
+}
+.kbd-button {
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-xs);
+  padding: 2px var(--space-2, 0.5rem);
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  background: none;
+}
+.kbd-button:hover { color: var(--ink); border-color: var(--rule-strong); }
+
+/* ---- 4. The index -------------------------------------------------------- */
+.search-results { padding: var(--space-5, 1.5rem) var(--space-4, 1rem) var(--space-4, 1rem); }
+
+/* §11: restrained is not invisible. House annotation type, and enough ink to
+   read as deliberate. */
+.search-dialog .search-label {
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(20 20 20 / 62%);
+  padding: 0 var(--space-4, 1rem) var(--space-4, 1rem);
+}
+
+/* §12: entries in an index. No card at rest, no tile, no row background. */
+.search-dialog .search-results > a {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: var(--space-3, 0.75rem);
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+  border-radius: 0;
+  background: none;
+  position: relative;
+}
+
+/* §13: the rounded icon box was generic app iconography. The number is the
+   notation this publication already uses for figures, stages and sections. */
+.result-index {
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.search-dialog .search-results > a > div { min-width: 0; }
+.search-dialog .search-results b {
+  display: block;
+  font-size: var(--text-base);
+  font-weight: 500;
+  line-height: var(--leading-snug);
+  color: var(--ink);          /* §9: full ink. It is the information. */
+  letter-spacing: -0.01em;
+}
+.search-dialog .search-results p {
+  margin: 4px 0 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+  color: rgb(20 20 20 / 64%);
+}
+.result-where {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(20 20 20 / 62%);   /* 50% measured 3.38:1; this clears AA        */
+}
+.search-dialog .search-results > a > svg { color: var(--rule-strong); align-self: center; }
+
+/* §14: the selection is unmistakable without becoming a filled rectangle —
+   the title takes the identity colour, a marker appears in the gutter, and the
+   sheet densifies very slightly under the row. */
+.search-dialog .search-results > a:hover,
+.search-dialog .search-results > a:focus,
+.search-dialog .search-results > a:focus-visible {
+  background: rgb(60 84 64 / 7%);
+  outline: none;
+}
+.search-dialog .search-results > a:hover b,
+.search-dialog .search-results > a:focus b { color: var(--identity); }
+.search-dialog .search-results > a:hover .result-index,
+.search-dialog .search-results > a:focus .result-index { color: var(--identity); }
+.search-dialog .search-results > a:hover > svg,
+.search-dialog .search-results > a:focus > svg { color: var(--identity); }
+.search-dialog .search-results > a::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55rem;
+  bottom: 0.55rem;
+  width: 2px;
+  background: var(--identity);
+  opacity: 0;
+  transition: opacity var(--dur-micro, 120ms) ease;
+}
+.search-dialog .search-results > a:hover::before,
+.search-dialog .search-results > a:focus::before { opacity: 1; }
+
+/* ---- 5. The footer ------------------------------------------------------- */
+.search-footer {
+  padding: var(--space-3, 0.75rem) var(--space-6, 2rem);
+  border-top: 1px solid var(--rule);
+  background: none;
+  font-size: var(--text-meta);
+  color: rgb(20 20 20 / 58%);
+}
+.search-footer kbd {
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--rule-strong);
+  border-radius: 0;
+  padding: 0 2px;
+  color: var(--ink);
+}
+
+.empty-search { color: var(--muted); }
+.empty-search h3 { color: var(--ink); }
+.empty-search > svg { color: var(--rule-strong); }
+
+/* ---- 6. Dark: the same material, not black glass ------------------------- */
+[data-theme='dark'] {
+  --search-sheet: rgb(30 34 30 / 90%);
+  --search-scrim: rgb(6 9 7 / 38%);   /* the page stays perceptible (§28)     */
+}
+[data-theme='dark'] .search-dialog {
+  border-color: rgb(255 255 255 / 10%);
+  box-shadow: 0 40px 120px -40px rgb(0 0 0 / 55%);
+}
+[data-theme='dark'] .search-dialog .search-input-row input::placeholder { color: rgb(236 240 233 / 55%); }
+[data-theme='dark'] .search-dialog .search-label { color: rgb(236 240 233 / 66%); }
+[data-theme='dark'] .search-dialog .search-results p { color: rgb(236 240 233 / 68%); }
+[data-theme='dark'] .result-where { color: rgb(236 240 233 / 54%); }
+[data-theme='dark'] .search-footer { color: rgb(236 240 233 / 62%); }
+[data-theme='dark'] .search-dialog .search-results > a:hover,
+[data-theme='dark'] .search-dialog .search-results > a:focus { background: rgb(180 210 180 / 9%); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-theme='dark'] .search-dialog { background: rgb(30 34 30 / 98%); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  [data-theme='dark'] .search-dialog { background: rgb(30 34 30 / 99%); }
+}
+
+/* ---- 7. Phone: a sheet, not a shrunken modal (§27) ----------------------- */
+@media (max-width: 32rem) {
+  .search-dialog {
+    width: 100%;
+    max-width: 100%;
+    margin: var(--space-2, 0.5rem) auto 0;
+    max-height: calc(100dvh - 1rem);
+    /* A sliver of the receded publication still frames the sheet, so the
+       reader keeps the sense of being above the page they were reading. */
+  }
+  .search-input-row { padding: var(--space-4, 1rem) var(--space-4, 1rem); }
+  .search-dialog .search-input-row input { font-size: var(--text-base); }
+  .search-results { max-height: none; padding-inline: var(--space-2, 0.5rem); }
+  .search-dialog .search-results > a {
+    grid-template-columns: 1.75rem minmax(0, 1fr);
+    padding-block: var(--space-4, 1rem);   /* comfortable touch targets       */
+  }
+  .search-dialog .search-results > a > svg { display: none; }
+  .search-dialog .search-label { padding-inline: var(--space-3, 0.75rem); }
+  .search-footer { padding: var(--space-3, 0.75rem) var(--space-4, 1rem); }
+  /* The close control is a target, not a keyboard hint. */
+  .kbd-button {
+    min-height: 2.25rem;
+    padding-inline: var(--space-3, 0.75rem);
+    font-family: var(--sans);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+}
+
+/* ---- 8. The list scrolls on purpose (§22) -------------------------------- */
+/* The panel is the object; the index inside it is what moves, with the search
+   line and the footer staying put so the surface never looks clipped. */
+.search-dialog { display: flex; flex-direction: column; }
+.search-input-row, .search-footer { flex: none; }
+.search-results { flex: 1 1 auto; min-height: 0; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--rule-strong) transparent; }
+.search-results::-webkit-scrollbar { width: 10px; }
+.search-results::-webkit-scrollbar-track { background: none; }
+.search-results::-webkit-scrollbar-thumb { background: var(--rule); border: 3px solid transparent; background-clip: content-box; border-radius: 99px; }
+.search-results:hover::-webkit-scrollbar-thumb { background: var(--rule-strong); background-clip: content-box; }
+
+/* ---- 9. Motion: a layer comes into focus (§24, §25, §26) ----------------- */
+.search-dialog[open] { animation: search-in var(--dur-ui, 200ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both; }
+.search-dialog[open]::backdrop { animation: scrim-in var(--dur-panel, 280ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both; }
+@keyframes search-in { from { opacity: 0; transform: translateY(-6px); } }
+@keyframes scrim-in { from { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .search-dialog[open],
+  .search-dialog[open]::backdrop { animation: none; }
+  .search-dialog .search-results > a::before { transition: none; }
+}
+
+/* ---- 10. While the sheet is down (§23, §30) ------------------------------ */
+/* The modal dialog already makes the document inert, so the page cannot take a
+   click. It could still take a wheel, which let the reader scroll a page they
+   could no longer read; the position is held instead. */
+html:has(.search-dialog[open]) { overflow: hidden; }
+
+/* The masthead carries its own backdrop-filter. Behind the sheet it is
+   invisible and still composited, which is the second expensive surface §30
+   warns about. One blur at a time. */
+html:has(.search-dialog[open]) .topbar {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}

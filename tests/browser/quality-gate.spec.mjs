@@ -1379,3 +1379,229 @@ test.describe('the masthead under reduced motion', () => {
     expect(await page.locator('.sidebar.open').count(), 'reduced motion cost the reader the guide').toBe(1);
   });
 });
+
+/* ==========================================================================
+   The search overlay — warm frosted paper, crisp ink
+   ========================================================================== */
+
+test.describe('search is a translucent material carrying opaque information', () => {
+  test.use({ viewport: { width: 1440, height: 950 } });
+
+  const openSearch = async page => {
+    await page.goto('/#hardware');
+    await page.waitForSelector('.search-trigger');
+    await page.click('.search-trigger');
+    await page.waitForSelector('.search-dialog[open]');
+    await page.waitForTimeout(350);
+  };
+
+  test('the sheet has a material of its own, and it is warm', async ({ page }) => {
+    await openSearch(page);
+    const m = await page.evaluate(() => {
+      const cs = getComputedStyle(document.querySelector('.search-dialog'));
+      const rgba = cs.backgroundColor.match(/[\d.]+/g).map(Number);
+      return { rgba, radius: cs.borderRadius, shadow: cs.boxShadow };
+    });
+    const [r, g, b, a] = m.rgba;
+    // The one-canvas layer remaps --surface to transparent for page regions.
+    // The panel is an object, not a region: it must not inherit that.
+    expect(a, 'the search panel has no material of its own').toBeGreaterThan(0.8);
+    expect(a, 'the panel went opaque and stopped being a translucent sheet').toBeLessThan(0.96);
+    // Warm: red above blue, as the canvas is. A neutral or cool grey fails.
+    expect(r, 'the sheet is not a warm paper').toBeGreaterThan(b + 5);
+  });
+
+  test('the publication behind is perceptible but not readable', async ({ page }) => {
+    // Measured, not asserted from the stylesheet: the same patch of page, with
+    // and without the sheet over it, directly above the largest type on it.
+    const patch = { x: 1005, y: 255, width: 28, height: 80 };
+    const spread = async () => {
+      const shot = await page.screenshot({ clip: patch });
+      // PNG is opaque here; sample luminance range via the raw framebuffer
+      return page.evaluate(async b64 => {
+        const img = new Image();
+        img.src = 'data:image/png;base64,' + b64;
+        await img.decode();
+        const c = document.createElement('canvas');
+        c.width = img.width; c.height = img.height;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const d = ctx.getImageData(0, 0, c.width, c.height).data;
+        const lin = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+        let min = 2, max = 0;
+        for (let i = 0; i < d.length; i += 4) {
+          const l = 0.2126 * lin(d[i]) + 0.7152 * lin(d[i + 1]) + 0.0722 * lin(d[i + 2]);
+          if (l < min) min = l; if (l > max) max = l;
+        }
+        return max - min;
+      }, shot.toString('base64'));
+    };
+    await page.goto('/#hardware');
+    await page.waitForTimeout(600);
+    const bare = await spread();
+    await openSearch(page);
+    const through = await spread();
+    expect(bare, 'the reference patch does not contain the headline').toBeGreaterThan(0.4);
+    // The page must recede: at least 95% of the headline's contrast removed.
+    expect(through / bare, 'the article behind search still competes').toBeLessThan(0.05);
+    // ...and it must not go black: the sheet is warm paper, not a dark scrim.
+    expect(through, 'the page behind has been obliterated, not receded').toBeGreaterThan(0);
+  });
+
+  test('the information on the sheet is not transparent', async ({ page }) => {
+    await openSearch(page);
+    const m = await page.evaluate(() => {
+      const op = s => getComputedStyle(document.querySelector(s)).opacity;
+      return {
+        title: op('.search-results > a b'),
+        desc: op('.search-results > a p'),
+        label: op('.search-label'),
+        footer: op('.search-footer'),
+        titleColour: getComputedStyle(document.querySelector('.search-results > a b')).color,
+      };
+    });
+    // §32: the failure mode is "everything was given 50% opacity". Contrast is
+    // carried by colour against the sheet, never by making the ink see-through.
+    for (const [name, value] of Object.entries(m)) {
+      if (name === 'titleColour') continue;
+      expect(Number(value), `${name} is a transparent piece of information`).toBe(1);
+    }
+    expect(m.titleColour, 'the result title is not at full ink').toBe('rgb(20, 20, 20)');
+  });
+
+  test('results are index entries, not cards, and carry editorial notation', async ({ page }) => {
+    await openSearch(page);
+    const m = await page.evaluate(() => {
+      const rows = [...document.querySelectorAll('.search-results > a')];
+      const cs = getComputedStyle(rows[0]);
+      return {
+        count: rows.length,
+        numbers: rows.map(r => r.querySelector('.result-index')?.innerText),
+        radius: cs.borderRadius,
+        restBg: cs.backgroundColor,
+        iconBoxes: document.querySelectorAll('.result-icon').length,
+        mono: getComputedStyle(rows[0].querySelector('.result-index')).fontFamily,
+      };
+    });
+    expect(m.count).toBeGreaterThan(4);
+    // §13: the rounded icon containers are gone, replaced by numbering.
+    expect(m.iconBoxes, 'the generic icon boxes are still there').toBe(0);
+    expect(m.numbers[0]).toBe('01');
+    expect(m.numbers[4]).toBe('05');
+    expect(m.mono.toLowerCase()).toMatch(/mono/);
+    // §12: no card at rest.
+    expect(m.radius).toBe('0px');
+    expect(m.restBg).toMatch(/rgba\(0, 0, 0, 0\)|transparent/);
+  });
+
+  test('keyboard selection is unmistakable and wraps', async ({ page }) => {
+    await openSearch(page);
+    await page.keyboard.press('ArrowDown');
+    await page.waitForTimeout(400);   // the gutter marker fades in over 120ms
+    const first = await page.evaluate(() => {
+      const a = document.activeElement;
+      const cs = getComputedStyle(a);
+      const marker = getComputedStyle(a, '::before');
+      return {
+        isResult: a.matches('.search-results > a'),
+        title: a.querySelector('b').innerText,
+        titleColour: getComputedStyle(a.querySelector('b')).color,
+        density: cs.backgroundColor,
+        markerOpacity: marker.opacity,
+        markerWidth: marker.width,
+      };
+    });
+    expect(first.isResult, 'the arrow key did not move into the results').toBe(true);
+    // §14: colour + gutter marker + a slight density shift, not a filled pill.
+    expect(first.titleColour, 'the selected title is not on the identity colour').toBe('rgb(60, 84, 64)');
+    expect(first.markerOpacity, 'the selection marker is invisible').toBe('1');
+    expect(first.markerWidth).toBe('2px');
+    expect(first.density).not.toMatch(/rgba\(0, 0, 0, 0\)/);
+
+    // Wrap in both directions, so the list never dead-ends.
+    const titles = await page.evaluate(() => [...document.querySelectorAll('.search-results > a b')].map(b => b.innerText));
+    const at = () => page.evaluate(() => document.activeElement.querySelector('b').innerText);
+    // Focus is on the first entry; up from there wraps to the last, and down
+    // from the last comes back round, so the list never dead-ends.
+    expect(await at()).toBe(titles[0]);
+    await page.keyboard.press('ArrowUp');
+    expect(await at()).toBe(titles[titles.length - 1]);
+    await page.keyboard.press('ArrowDown');
+    expect(await at()).toBe(titles[0]);
+  });
+
+  test('the page behind is held still and takes no pointer', async ({ page }) => {
+    await page.goto('/#hardware');
+    await page.waitForTimeout(500);
+    await page.evaluate(() => window.scrollTo(0, 300));
+    await page.click('.search-trigger');
+    await page.waitForSelector('.search-dialog[open]');
+    await page.mouse.wheel(0, 600);
+    await page.waitForTimeout(300);
+    expect(await page.evaluate(() => window.scrollY), 'the page scrolled behind the sheet').toBe(300);
+    // The results themselves must still move.
+    await page.hover('.search-results');
+    await page.mouse.wheel(0, 250);
+    await page.waitForTimeout(250);
+    expect(await page.evaluate(() => document.querySelector('.search-results').scrollTop))
+      .toBeGreaterThan(0);
+    // §30: one blurred surface at a time.
+    const filtered = await page.evaluate(() => [...document.querySelectorAll('*')]
+      .filter(e => getComputedStyle(e).backdropFilter !== 'none').length);
+    expect(filtered, 'a second backdrop-filter is compositing behind the sheet').toBe(0);
+
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+    expect(await page.evaluate(() => document.activeElement.className),
+      'focus did not return to the search trigger').toContain('search-trigger');
+    expect(await page.evaluate(() => window.scrollY), 'the page moved when search closed').toBe(300);
+  });
+
+  test('the phone gets a sheet, not a shrunken modal', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await openSearch(page);
+    const m = await page.evaluate(() => {
+      const d = document.querySelector('.search-dialog').getBoundingClientRect();
+      const close = document.querySelector('.kbd-button');
+      const cb = close.getBoundingClientRect();
+      const input = document.querySelector('.search-input-row input');
+      return {
+        widthShare: d.width / window.innerWidth,
+        closeLabel: close.innerText,
+        closeHeight: cb.height,
+        placeholderFits: input.scrollWidth <= input.clientWidth + 1,
+        rowHeight: document.querySelector('.search-results > a').getBoundingClientRect().height,
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+    expect(m.widthShare, 'the phone got the desktop modal, shrunk').toBeGreaterThan(0.9);
+    expect(m.closeLabel, 'the only way out is a keyboard hint').toBe('Close');
+    expect(m.closeHeight).toBeGreaterThanOrEqual(36);
+    expect(m.placeholderFits, 'the prompt is truncated').toBe(true);
+    expect(m.rowHeight, 'the result rows are not comfortable targets').toBeGreaterThanOrEqual(44);
+    expect(m.overflow).toBeLessThanOrEqual(0);
+  });
+});
+
+test.describe('search under reduced motion', () => {
+  test.use({ viewport: { width: 1440, height: 950 }, reducedMotion: 'reduce' });
+
+  test('it resolves immediately and stays fully usable', async ({ page }) => {
+    await page.goto('/#hardware');
+    await page.waitForSelector('.search-trigger');
+    await page.click('.search-trigger');
+    await page.waitForTimeout(80);   // an animation would still be mid-flight
+    const m = await page.evaluate(() => {
+      const d = document.querySelector('.search-dialog');
+      const cs = getComputedStyle(d);
+      return { animation: cs.animationName, opacity: cs.opacity, transform: cs.transform,
+               height: d.getBoundingClientRect().height };
+    });
+    expect(m.animation).toBe('none');
+    expect(m.opacity).toBe('1');
+    expect(m.transform).toBe('none');
+    expect(m.height).toBeGreaterThan(200);
+    await page.keyboard.press('ArrowDown');
+    expect(await page.evaluate(() => document.activeElement.matches('.search-results > a'))).toBe(true);
+  });
+});

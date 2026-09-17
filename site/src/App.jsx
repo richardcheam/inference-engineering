@@ -133,16 +133,57 @@ function readRoute() { const [id, section] = window.location.hash.slice(1).split
 
 function SearchDialog({ open, close, opener }) {
   const ref = useRef(null); const input = useRef(null); const [query, setQuery] = useState('');
+  // §27: a phone is not a narrow desktop. The prompt and the close affordance
+  // are written for the device rather than truncated for it.
+  const [narrow, setNarrow] = useState(() => window.matchMedia('(max-width: 32rem)').matches);
+  useEffect(() => {
+    const q = window.matchMedia('(max-width: 32rem)');
+    const listener = e => setNarrow(e.matches);
+    q.addEventListener('change', listener);
+    return () => q.removeEventListener('change', listener);
+  }, []);
+  const list = useRef(null);
   useEffect(() => {
     if (open) { setQuery(''); ref.current.showModal(); input.current.focus(); }
     else if (ref.current.open) { ref.current.close(); opener.current?.focus(); }
   }, [open, opener]);
   const terms = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
   const results = allPages.filter(p => terms.every(t => `${p.title} ${p.description} ${p.text}`.toLowerCase().includes(t))).slice(0,9);
-  return <dialog ref={ref} className="search-dialog" onCancel={close} onClick={e => { if (e.target === ref.current) close(); }} aria-label="Search the atlas">
-    <div className="search-input-row"><Search size={20}/><input ref={input} aria-label="Search lessons and notes" placeholder="Search a concept, model, or question…" value={query} onChange={e => setQuery(e.target.value)}/><button className="kbd-button" onClick={close}>esc</button></div>
-    <div className="search-results"><div className="search-label">{query ? `${results.length} matching resources` : 'EXPLORE THE GUIDE'}</div>{results.length ? results.map(p => <a key={p.id} href={`#${p.id}`} onClick={close}><span className="result-icon"><Icon name={p.icon} size={18}/></span><div><b>{p.title}</b><p>{p.description}</p></div><ArrowUpRight size={16}/></a>) : <div className="empty-search"><Search size={26}/><h3>No matches yet</h3><p>Try “KV cache”, “GH200”, “GLM”, or “throughput”.</p></div>}</div>
-    <div className="search-footer"><span>Search across all lessons and reference notes</span><span><kbd>tab</kbd> to navigate <kbd>↵</kbd> to open</span></div>
+
+  // Tab already walked the results, but a search field is a place people press
+  // the arrow keys. The two agree: both move real DOM focus, so the selected
+  // entry is the focused entry and there is no second source of truth.
+  const move = step => {
+    const links = [...(list.current?.querySelectorAll('a') || [])];
+    if (!links.length) return;
+    const at = links.indexOf(document.activeElement);
+    const next = at < 0 ? (step > 0 ? 0 : links.length - 1)
+                        : (at + step + links.length) % links.length;
+    links[next].focus();
+  };
+  const onKeyDown = event => {
+    if (event.key === 'ArrowDown') { event.preventDefault(); move(1); }
+    else if (event.key === 'ArrowUp') { event.preventDefault(); move(-1); }
+    else if (event.key === 'Enter' && document.activeElement === input.current) {
+      const first = list.current?.querySelector('a');
+      if (first) { event.preventDefault(); first.click(); }
+    }
+  };
+
+  // §15: where the entry sits in the publication, and nothing more.
+  const where = p => [p.chapter ? `CHAPTER ${p.chapter}` : null, p.category]
+    .filter(Boolean).join(' · ').toUpperCase();
+  return <dialog ref={ref} className="search-dialog" onCancel={close} onKeyDown={onKeyDown} onClick={e => { if (e.target === ref.current) close(); }} aria-label="Search the atlas">
+    <div className="search-input-row"><Search size={20}/><input ref={input} aria-label="Search lessons and notes" placeholder={narrow ? 'Search the guide…' : 'Search a concept, model, or question…'} value={query} onChange={e => setQuery(e.target.value)}/><button className="kbd-button" onClick={close} aria-label="Close search">{narrow ? 'Close' : 'esc'}</button></div>
+    <div className="search-results" ref={list}>
+      <div className="search-label" role="status" aria-live="polite">{query ? `${results.length} matching resources` : 'EXPLORE THE GUIDE'}</div>
+      {results.length ? results.map((p, i) => <a key={p.id} href={`#${p.id}`} onClick={close}>
+        <span className="result-index" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+        <div><b>{p.title}</b><p>{p.description}</p>{where(p) && <span className="result-where">{where(p)}</span>}</div>
+        <ArrowUpRight size={16} aria-hidden="true"/>
+      </a>) : <div className="empty-search"><Search size={26}/><h3>No matches yet</h3><p>Try “KV cache”, “GH200”, “GLM”, or “throughput”.</p></div>}
+    </div>
+    <div className="search-footer"><span>Search across all lessons and reference notes</span><span><kbd>↑↓</kbd> to navigate <kbd>↵</kbd> to open <kbd>esc</kbd> to close</span></div>
   </dialog>;
 }
 
