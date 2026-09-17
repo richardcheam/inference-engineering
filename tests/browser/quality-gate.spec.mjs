@@ -1551,10 +1551,20 @@ test.describe('search is a translucent material carrying opaque information', ()
     expect(filtered, 'a second backdrop-filter is compositing behind the sheet').toBe(0);
 
     await page.keyboard.press('Escape');
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(400);
     expect(await page.evaluate(() => document.activeElement.className),
       'focus did not return to the search trigger').toContain('search-trigger');
     expect(await page.evaluate(() => window.scrollY), 'the page moved when search closed').toBe(300);
+
+    // ...and the page must be scrollable by wheel again afterwards. Making the
+    // dialog a flex column turned it into a scroll container, Chrome latched
+    // the wheel to it, and the page could not be wheel-scrolled for the rest
+    // of the session. Nothing about the layout revealed it.
+    await page.mouse.move(700, 500);
+    await page.mouse.wheel(0, 300);
+    await page.waitForTimeout(500);
+    expect(await page.evaluate(() => window.scrollY),
+      'the page cannot be scrolled by wheel after search closed').toBeGreaterThan(300);
   });
 
   test('the phone gets a sheet, not a shrunken modal', async ({ page }) => {

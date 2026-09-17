@@ -147,6 +147,22 @@ function SearchDialog({ open, close, opener }) {
     if (open) { setQuery(''); ref.current.showModal(); input.current.focus(); }
     else if (ref.current.open) { ref.current.close(); opener.current?.focus(); }
   }, [open, opener]);
+
+  // The modal already makes the page inert to clicks, but not to the wheel, and
+  // scrolling an article you can no longer read is not deliberate. Two other
+  // ways of holding it were tried and rejected against the browser: `overflow:
+  // hidden` on `html` removes the scrollbar and shifted the whole page 15px on
+  // every platform that draws a real one, and a non-passive wheel listener
+  // left the document unable to scroll by wheel after the sheet had closed.
+  // Re-asserting the position touches neither layout nor event handling.
+  useEffect(() => {
+    if (!open) return undefined;
+    const held = window.scrollY;
+    const hold = () => { if (window.scrollY !== held) window.scrollTo(0, held); };
+    window.addEventListener('scroll', hold, { passive: true });
+    return () => window.removeEventListener('scroll', hold);
+  }, [open]);
+
   const terms = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
   const results = allPages.filter(p => terms.every(t => `${p.title} ${p.description} ${p.text}`.toLowerCase().includes(t))).slice(0,9);
 

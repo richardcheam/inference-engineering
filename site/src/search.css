@@ -242,7 +242,7 @@
   }
   .search-input-row { padding: var(--space-4, 1rem) var(--space-4, 1rem); }
   .search-dialog .search-input-row input { font-size: var(--text-base); }
-  .search-results { max-height: none; padding-inline: var(--space-2, 0.5rem); }
+  .search-results { padding-inline: var(--space-2, 0.5rem); }
   .search-dialog .search-results > a {
     grid-template-columns: 1.75rem minmax(0, 1fr);
     padding-block: var(--space-4, 1rem);   /* comfortable touch targets       */
@@ -262,10 +262,12 @@
 
 /* ---- 8. The list scrolls on purpose (§22) -------------------------------- */
 /* The panel is the object; the index inside it is what moves, with the search
-   line and the footer staying put so the surface never looks clipped. */
-.search-dialog { display: flex; flex-direction: column; }
-.search-input-row, .search-footer { flex: none; }
-.search-results { flex: 1 1 auto; min-height: 0; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--rule-strong) transparent; }
+   line and the footer staying put so the surface never looks clipped.
+   Deliberately NOT `display: flex` on the dialog: combined with the panel's
+   `overflow: hidden` that makes the dialog itself a scroll container, and
+   Chrome then latches the wheel to it — after the sheet closed, the page could
+   no longer be scrolled by wheel at all. The list is sized directly instead. */
+.search-results { max-height: min(58vh, 34rem); scrollbar-width: thin; scrollbar-color: var(--rule-strong) transparent; }
 .search-results::-webkit-scrollbar { width: 10px; }
 .search-results::-webkit-scrollbar-track { background: none; }
 .search-results::-webkit-scrollbar-thumb { background: var(--rule); border: 3px solid transparent; background-clip: content-box; border-radius: 99px; }
@@ -284,10 +286,12 @@
 }
 
 /* ---- 10. While the sheet is down (§23, §30) ------------------------------ */
-/* The modal dialog already makes the document inert, so the page cannot take a
-   click. It could still take a wheel, which let the reader scroll a page they
-   could no longer read; the position is held instead. */
-html:has(.search-dialog[open]) { overflow: hidden; }
+/* The page is held still while the sheet is down, but not with `overflow:
+   hidden` on `html`: that removes the scrollbar, and on platforms with classic
+   scrollbars rather than macOS's overlay ones it reflowed the whole page 15px
+   as search opened. `scrollbar-gutter: stable` does not help, because Chrome
+   does not reserve a gutter for an `overflow: hidden` box. The hold is done in
+   the component instead, by refusing the wheel, which touches no geometry. */
 
 /* The masthead carries its own backdrop-filter. Behind the sheet it is
    invisible and still composited, which is the second expensive surface §30
@@ -295,4 +299,11 @@ html:has(.search-dialog[open]) { overflow: hidden; }
 html:has(.search-dialog[open]) .topbar {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+}
+
+
+/* The phone's list height has to be stated after the desktop cap above, or the
+   sheet stops short of the viewport it is supposed to fill. */
+@media (max-width: 32rem) {
+  .search-results { max-height: calc(100dvh - 8.5rem); }
 }
