@@ -137,3 +137,159 @@
     max-inline-size: 46ch;
   }
 }
+
+/* ============================================================================
+   Cause, transformation, consequence — module 14 §29
+
+   Three stages carrying the real objects rather than three labels and two
+   arrows. Direction comes from the rule and the numbering; the consequence is
+   the only stage that takes colour, because it is the only one that is news.
+   ========================================================================= */
+
+.ds .tradeoff { margin: var(--space-7, 3rem) 0; }
+
+.ds .tradeoff-stages {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-5, 1.5rem) 0 0;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: var(--col-gap, 2rem);
+}
+.ds .tradeoff-stages::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: var(--rule-strong);
+}
+.ds .tradeoff-stages > li { position: relative; min-width: 0; }
+.ds .tradeoff-stages > li::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--space-5, 1.5rem) * -1 - 0.21875rem);
+  left: 0;
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 50%;
+  background: var(--ink);
+}
+.ds .tradeoff-stages > li.consequence::before { background: var(--warning); }
+
+.ds .tradeoff-number {
+  display: block;
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: var(--space-3, 0.75rem);
+}
+.ds .tradeoff-name {
+  display: block;
+  font-family: var(--mono);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.ds .tradeoff-stages > li.consequence .tradeoff-name { color: var(--warning); }
+.ds .tradeoff-question {
+  display: block;
+  margin-top: var(--space-2, 0.5rem);
+  font-size: var(--text-base);
+  line-height: var(--leading-snug);
+  color: var(--text);
+}
+
+/* The artifact: devices as upright bays, filled to what they must hold. */
+.ds .tradeoff-devices {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 3.5rem;
+  margin: var(--space-5, 1.5rem) 0 var(--space-4, 1rem);
+}
+.ds .tradeoff-device {
+  position: relative;
+  flex: 1 1 0;
+  max-width: 1.5rem;
+  height: 100%;
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+.ds .tradeoff-device > i { display: block; width: 100%; background: var(--efficient); }
+/* One device cannot hold it: the fill runs past the top of the bay. */
+.ds .tradeoff-devices[data-over='true'] .tradeoff-device { border-color: var(--warning); }
+.ds .tradeoff-devices[data-over='true'] .tradeoff-device > i { background: var(--warning); }
+
+/* The collectives: one mark per synchronisation owed on every step. */
+.ds .tradeoff-collectives {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 3.5rem;
+  margin: var(--space-5, 1.5rem) 0 var(--space-4, 1rem);
+}
+.ds .tradeoff-collectives > i {
+  display: block;
+  width: 2px;
+  height: 1.75rem;
+  background: var(--warning);
+}
+
+.ds .tradeoff-figure { margin: 0; }
+.ds .tradeoff-figure > b {
+  display: block;
+  font-family: var(--display);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.ds .tradeoff-stages > li.consequence .tradeoff-figure > b { color: var(--warning); }
+.ds .tradeoff-figure > small {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.ds .tradeoff-verdict {
+  margin: var(--space-3, 0.75rem) 0 0;
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.ds .tradeoff-verdict.over,
+.ds .tradeoff-verdict.cost { color: var(--warning); }
+
+/* §22 the claim is the conclusion, set apart rather than centred under it. */
+.ds .tradeoff-claim {
+  margin-top: var(--space-6, 2rem);
+  padding-top: var(--space-4, 1rem);
+  border-top: 1px solid var(--rule);
+  font-size: var(--text-base);
+  line-height: var(--leading-prose);
+  color: var(--text);
+  max-inline-size: 52ch;
+  margin-left: auto;
+}
+
+/* §27 vertical below the point where three columns stop being readable. */
+@media (max-width: 52rem) {
+  .ds .tradeoff-stages { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-6, 2rem); padding-top: 0; }
+  .ds .tradeoff-stages::before { display: none; }
+  .ds .tradeoff-stages > li { border-left: 1px solid var(--rule-strong); padding-left: var(--space-5, 1.5rem); }
+  .ds .tradeoff-stages > li::before { top: 0.35rem; left: -0.25rem; }
+  .ds .tradeoff-claim { margin-left: 0; }
+}

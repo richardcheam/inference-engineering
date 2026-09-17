@@ -1094,3 +1094,44 @@ test.describe('relationships are composed, not punctuated', () => {
     expect(narrow.stops, 'a stop was dropped on a phone').toBe(wide.stops);
   });
 });
+
+test.describe('the device trade-off states its claim with real objects', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test('three stages, real figures, and colour only on the consequence', async ({ page }) => {
+    await page.goto('/#parallel');
+    await page.waitForSelector('.tradeoff');
+    const m = await page.evaluate(() => {
+      const t = document.querySelector('.tradeoff');
+      const warning = getComputedStyle(document.documentElement).getPropertyValue('--warning').trim();
+      const stages = [...t.querySelectorAll('.tradeoff-stages > li')];
+      const named = el => getComputedStyle(el).color;
+      return {
+        stages: stages.length,
+        figures: [...t.querySelectorAll('.tradeoff-figure b')].map(e => e.innerText),
+        coloured: stages.filter(s => s.classList.contains('consequence')).length,
+        consequenceIsLast: stages[stages.length - 1].classList.contains('consequence'),
+        devicesShown: t.querySelectorAll('.tradeoff-device').length,
+        collectives: t.querySelectorAll('.tradeoff-collectives > i').length,
+        claim: t.querySelector('.tradeoff-claim').innerText.length,
+        warning,
+        nameColours: stages.map(s => named(s.querySelector('.tradeoff-name'))),
+      };
+    });
+    expect(m.stages).toBe(3);
+    // Cause, transformation, consequence: the numbers are placeMemory's, so a
+    // figure that stops matching the model is a figure that became false.
+    expect(m.figures[0]).toMatch(/^\d+ GB$/);
+    expect(m.figures[1]).toMatch(/^\d+ GB$/);
+    expect(Number(m.figures[2])).toBeGreaterThan(0);
+    expect(Number(m.figures[0].split(' ')[0]))
+      .toBeGreaterThan(Number(m.figures[1].split(' ')[0]));
+    // One device drawn, then eight; the collectives match the rank count.
+    expect(m.devicesShown).toBe(9);
+    expect(m.collectives).toBe(7);
+    // §19: only the consequence takes colour.
+    expect(m.coloured, 'more than one stage is emphasised').toBe(1);
+    expect(m.consequenceIsLast).toBe(true);
+    expect(m.claim, 'the claim is missing').toBeGreaterThan(80);
+  });
+});

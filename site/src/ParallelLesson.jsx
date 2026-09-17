@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import PlacementScene from './PlacementScene';
 import Sequence from './Sequence';
+import Tradeoff from './Tradeoff';
 import LessonSection from './LessonSection';
 import PlacementExplorer from './PlacementExplorer';
 import { MathFormula } from './Lesson';
@@ -30,6 +31,7 @@ export default function ParallelLesson() {
       'A model that now fits can still be slower than one that already fitted.',
     ]}>
       <p>Chapter one's screen was a capacity question, and adding devices answers it: eight devices hold eight times the bytes. That is where the intuition stops being safe. Sharding a model does not simply divide the work; it introduces a point in every layer where every device must wait for the others, and that wait sits directly on the path of every token you generate.</p>
+      <Tradeoff/>
       <div className="key-idea"><p><b>Keep this distinction in mind</b><br/>Parallelism buys capacity reliably and latency conditionally. The capacity arrives the moment you add the device; the latency improvement has to beat the communication you just added.</p></div>
     </LessonSection>
 
