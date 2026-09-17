@@ -967,3 +967,68 @@ test.describe('the playback timeline is notation, not a slider', () => {
     expect(await tickOpacity(), 'the scrub marker never appears').toBe(1);
   });
 });
+
+test.describe('data marks are on the semantic palette', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  // Every bar, meter and mark predating the palette. The shell moved onto
+  // tokens and these did not, so nine chapters drew from a sage green, a dusty
+  // blue and a tan that meant different things in different places.
+  const RETIRED = [
+    'rgb(125, 151, 117)', 'rgb(139, 163, 127)', 'rgb(109, 138, 101)', 'rgb(95, 125, 87)',
+    'rgb(168, 190, 201)', 'rgb(144, 166, 182)',
+    'rgb(212, 198, 170)', 'rgb(217, 180, 143)', 'rgb(171, 158, 132)',
+    'rgb(172, 101, 82)', 'rgb(143, 168, 134)', 'rgb(102, 133, 111)', 'rgb(165, 160, 182)',
+  ];
+  const ROUTES = ['#feasibility', '#hardware', '#reuse', '#engine', '#measure',
+    '#profile', '#parallel', '#quantize', '#speculate', '#production'];
+
+  test('no chapter draws from a retired colour', async ({ page }) => {
+    for (const route of ROUTES) {
+      await page.goto('/' + route);
+      await page.waitForSelector('.article');
+      await page.waitForTimeout(250);
+      const hits = await page.evaluate(retired => {
+        const found = new Set();
+        document.querySelectorAll('.ds *').forEach(el => {
+          const cs = getComputedStyle(el);
+          for (const prop of ['backgroundColor', 'borderTopColor', 'color']) {
+            if (retired.includes(cs[prop])) {
+              const cls = (typeof el.className === 'string' ? el.className.trim().split(/\s+/)[0] : el.tagName) || el.tagName;
+              found.add(`${cls} ${prop} ${cs[prop]}`);
+            }
+          }
+        });
+        return [...found];
+      }, RETIRED);
+      expect(hits, `${route}: ${hits.join('; ')}`).toEqual([]);
+    }
+  });
+
+  test('explanatory content carries no card, only controls and artifacts do', async ({ page }) => {
+    // A rectangle is allowed around something a hand operates, around code,
+    // and around a plot area. Never around an explanation.
+    const allowed = /^(SELECT|BUTTON|INPUT|PRE|CODE|token-field|device-fill|weight|cache|hatched|pool-block|expert-grid|stream-strip)$/;
+    for (const route of ROUTES) {
+      await page.goto('/' + route);
+      await page.waitForSelector('.article');
+      await page.waitForTimeout(250);
+      const boxes = await page.evaluate(() => {
+        const hits = new Set();
+        document.querySelectorAll('.ds .article *').forEach(el => {
+          const cs = getComputedStyle(el);
+          const sides = ['Top', 'Right', 'Bottom', 'Left']
+            .filter(s => parseFloat(cs['border' + s + 'Width']) > 0);
+          const filled = cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && cs.backgroundColor !== 'transparent';
+          const b = el.getBoundingClientRect();
+          if (b.width > 200 && (sides.length === 4 || (filled && b.height > 40))) {
+            hits.add((typeof el.className === 'string' ? el.className.trim().split(/\s+/)[0] : el.tagName) || el.tagName);
+          }
+        });
+        return [...hits];
+      });
+      const unexpected = boxes.filter(b => !allowed.test(b));
+      expect(unexpected, `${route} boxes: ${unexpected.join(', ')}`).toEqual([]);
+    }
+  });
+});

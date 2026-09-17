@@ -554,3 +554,144 @@ body,
 @media (prefers-reduced-motion: reduce) {
   .ds input[type='range']::-webkit-slider-thumb { transition: none; }
 }
+
+/* ============================================================================
+   Data marks on the semantic palette
+
+   The shell moved onto tokens, and the bars did not. Nine chapters were still
+   drawing meters, tracks and marks from hexes chosen before the palette
+   existed: a sage green, a dusty blue, a tan. They read as a different design
+   from the page around them, and they said nothing consistent — the same tan
+   meant "quantization overhead" in one chapter and "third request" in another.
+
+   Each old colour is remapped to the meaning it was already carrying:
+     efficient  weights, reuse, cache hits, accepted work, healthy state
+     flow       cache and live state, movement, what a metric reports
+     warning    overhead, recomputation, over capacity, missed limits
+     identity   selected controls
+   ========================================================================= */
+/* #7d9775 -> efficient: weights, aggregate rates, healthy steady state */
+.ds .art-candidates>span.standing>i,
+.ds .art-experts>i.lit,
+.ds .art-widths>span>i,
+.ds .block-legend i.reused,
+.ds .block-strip>i.reused,
+.ds .device-fill .weight,
+.ds .draft-bar,
+.ds .expert-grid>i.lit,
+.ds .fan-legend i.aggregate,
+.ds .gap-actual,
+.ds .ladder-track>span,
+.ds .lane-id.owner-1,
+.ds .ledger-row.ledger-weights .ledger-bar>span,
+.ds .pool-block.owner-1 .pool-fill,
+.ds .pool-legend i.owner-1,
+.ds .precision-row .weight-track .weight,
+.ds .rung-bar,
+.ds .spec-token.accepted .spec-mark,
+.ds .stream-strip>i,
+.ds .weight,
+.ds [data-theme=dark] .art-experts>i.lit,
+.ds [data-theme=dark] .expert-grid>i.lit { background: var(--efficient); }
+
+/* #7d9775 -> efficient: weights, aggregate rates, healthy steady state */
+.ds .fan-line.aggregate { stroke: var(--efficient); }
+
+/* #8ba37f -> efficient: the same family, used in the small inline marks */
+.ds .art-blocks>i,
+.ds .art-devices>span>i,
+.ds .art-drafts>i,
+.ds .art-stack-rows>i,
+.ds .art-stream>i { background: var(--efficient); }
+
+/* #6d8a65 -> efficient: reuse: lit experts, reused blocks, shared prefix */
+.ds .block-strip>i.reused,
+.ds .expert-grid>i.lit,
+.ds .pool-block.shared,
+.ds .spec-token.accepted .spec-mark { border-color: var(--efficient); }
+
+/* #5f7d57 -> efficient: accepted and verified tokens */
+.ds .art-drafts>i.verified,
+.ds .draft-token.verified .draft-bar,
+.ds .lane-output,
+.ds .sparse-1 { background: var(--efficient); }
+
+/* #a8bec9 -> flow: cache and live state, and what a metric reports */
+.ds .cache,
+.ds .device-fill .cache,
+.ds .gap-reported,
+.ds .ledger-row.ledger-cache .ledger-bar>span,
+.ds .pool-block.owner-2 .pool-fill,
+.ds .pool-legend i.owner-2 { background: var(--flow); }
+
+/* #d4c6aa -> warning: overhead: quantization scales, and the third owner */
+.ds .overhead,
+.ds .pool-block.owner-3 .pool-fill,
+.ds .pool-legend i.owner-3,
+.ds .precision-row .weight-track .scales { background: var(--warning); }
+
+/* #d9b48f -> warning: recomputed work */
+.ds .art-blocks>i.recomputed,
+.ds .block-legend i.recomputed,
+.ds .block-strip>i.recomputed,
+.ds .draft-token.unlikely .draft-bar { background: var(--warning); }
+
+/* #ac6552 -> warning: over capacity, missed limits */
+.ds .bound-row strong.alarming,
+.ds .goodput-row .bad,
+.ds .lane.phase-blocked .lane-phase,.lane.phase-queued .lane-phase,
+.ds .model-verdict.over,
+.ds .verdict.over { color: var(--warning); }
+
+/* #8fa886 -> identity: selected controls */
+.ds .hypothesis.leading,
+.ds .scenario-picker button.active,
+.ds .symptom-grid button.active,
+.ds [data-theme=dark] .art-experts>i.lit,
+.ds [data-theme=dark] .expert-grid>i.lit { border-color: var(--identity); }
+
+/* Bars are notation, not pills. The tracks carried 999px ends while the newer
+   marks used 2px, so the same page had two vocabularies for one idea. */
+.ds .weight-track, .ds .weight-track > span,
+.ds .ledger-bar, .ds .ledger-bar > span,
+.ds .budget-meter, .ds .budget-meter > span,
+.ds .lane-track, .ds .ladder-track, .ds .ladder-track > span,
+.ds .model-meter, .ds .model-meter > span,
+.ds .stream-strip i { border-radius: 2px; }
+
+/* An empty track is the canvas showing through, not a grey rail. */
+.ds .weight-track, .ds .ledger-bar, .ds .budget-meter,
+.ds .lane-track, .ds .ladder-track, .ds .model-meter { background: var(--canvas-deep); }
+
+/* Four checkpoints in a comparison need to be told apart, and nothing more:
+   there is no sense in which one model is a warning and another is healthy.
+   They are therefore steps along the identity hue rather than four invented
+   colours, which keeps the semantic palette free to carry meaning. */
+:root {
+  --model-1: color-mix(in oklab, var(--identity) 88%, var(--canvas));
+  --model-2: color-mix(in oklab, var(--identity) 64%, var(--canvas));
+  --model-3: color-mix(in oklab, var(--identity) 42%, var(--canvas));
+  --model-4: color-mix(in oklab, var(--identity) 24%, var(--canvas));
+}
+
+/* Three callouts kept their cards through the earlier pass because they are
+   named differently from the rest: a source excerpt, a precision caveat and a
+   speculation verdict. None of them is a physical boundary (§7), so each
+   becomes the same single rule the other callouts use, coloured by what it
+   means. */
+.ds .source-quote,
+.ds .execution-note,
+.ds .speculate-verdict {
+  background: none;
+  border: 0;
+  border-left: 2px solid var(--rule-strong);
+  border-radius: 0;
+  box-shadow: none;
+  padding: var(--space-1, 0.25rem) 0 var(--space-1, 0.25rem) var(--space-5, 1.5rem);
+}
+/* A caveat about what a format does not buy you is a cost, not a finding. */
+.ds .execution-note { border-left-color: var(--warning); }
+.ds .speculate-verdict { border-left-color: var(--identity); }
+
+/* The code block keeps its dark surface: code is evidence, and the contrast is
+   what makes it legible as a quotation from somewhere else. */
