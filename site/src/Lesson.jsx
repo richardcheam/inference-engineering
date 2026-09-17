@@ -3,6 +3,7 @@ import katex from 'katex';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import MemoryExplorer, { WeightComparison } from './MemoryExplorer';
 import DecodeWalkthrough from './DecodeWalkthrough';
+import Sequence from './Sequence';
 import LessonSection from './LessonSection';
 
 export const lessonToc = [
@@ -85,7 +86,12 @@ export default function Lesson() {
     <LessonSection id="beyond-capacity" number="06" label="TAKE THE NEXT STEP" title="“It fits” starts the investigation." summary={[
       'Capacity, then compatibility, then performance, then operations.',
       'A model can fit comfortably and still miss its latency target.',
-    ]}><p>A capacity candidate still needs compatible kernels, a workable placement, and enough bandwidth and compute for the workload. A model may fit comfortably and still miss its latency target.</p><div className="decision-flow"><span>Capacity</span><ArrowRight/><span>Compatibility</span><ArrowRight/><span>Performance</span><ArrowRight/><span>Operations</span></div><div className="takeaway"><div><h3>The engineering habit</h3><p>Start with a resource model, keep assumptions visible, and use measurements to improve that model. The goal is to understand why a system behaves as it does.</p></div></div><div className="lesson-sources"><span className="eyebrow">EVIDENCE BEHIND THIS LESSON</span><a href="#example">Full worked calculation <ArrowUpRight size={13}/></a><a href="#sources">Pinned configurations and tensor indices <ArrowUpRight size={13}/></a></div></LessonSection>
+    ]}><p>A capacity candidate still needs compatible kernels, a workable placement, and enough bandwidth and compute for the workload. A model may fit comfortably and still miss its latency target.</p><Sequence label="The screen" steps={[
+        { name: 'Capacity', question: 'Does it fit at all?', detail: 'weights · cache · execution' },
+        { name: 'Compatibility', question: 'Will it run on this stack?', detail: 'kernels · precision · attention' },
+        { name: 'Performance', question: 'Is it fast enough?', detail: 'bandwidth · compute · batch' },
+        { name: 'Operations', question: 'Can you keep it running?', detail: 'admission · failure · load' },
+      ]}/><div className="takeaway"><div><h3>The engineering habit</h3><p>Start with a resource model, keep assumptions visible, and use measurements to improve that model. The goal is to understand why a system behaves as it does.</p></div></div><div className="lesson-sources"><span className="eyebrow">EVIDENCE BEHIND THIS LESSON</span><a href="#example">Full worked calculation <ArrowUpRight size={13}/></a><a href="#sources">Pinned configurations and tensor indices <ArrowUpRight size={13}/></a></div></LessonSection>
     <a className="next-lesson" href="#hardware"><div><span className="eyebrow">UP NEXT · CHAPTER 02 · HARDWARE SPEED LIMITS</span><h3>Now put a clock on it.</h3><p>A model that fits still has a speed limit.</p></div><span className="next-arrow"><ArrowRight size={24}/></span></a>
   </div>;
 }

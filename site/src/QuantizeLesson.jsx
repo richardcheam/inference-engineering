@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import Sequence from './Sequence';
 import LessonSection from './LessonSection';
 import PrecisionExplorer from './PrecisionExplorer';
 import { MathFormula } from './Lesson';
@@ -71,7 +72,12 @@ export default function QuantizeLesson() {
       'Use a matched evaluation set and compare against the same model at full precision.',
     ]}>
       <p>Everything on this page is a capacity and bandwidth result. Whether the quantized model still answers correctly is a different measurement, and the honest version compares the same prompts against the same model at higher precision rather than against a published score for a different setup.</p>
-      <div className="decision-flow"><span>Stored format</span><ArrowRight/><span>Kernel support</span><ArrowRight/><span>Memory and latency</span><ArrowRight/><span>Matched quality set</span></div>
+      <Sequence label="Before you quantize" steps={[
+        { name: 'Stored format', question: 'What is on disk?', detail: 'bits per value · scales · groups' },
+        { name: 'Kernel support', question: 'What can the stack execute?', detail: 'supported paths, not formats' },
+        { name: 'Memory and latency', question: 'What did it actually buy?', detail: 'resident bytes · step time' },
+        { name: 'Matched quality set', question: 'Did the answers change?', detail: 'same prompts, both precisions' },
+      ]}/>
       <div className="takeaway"><div><h3>The engineering habit</h3><p>Quote a quantization result as three numbers, not one: what it saved, what it cost in latency, and what it did to quality on your own evaluation. A format name on its own is not a result.</p></div></div>
       <div className="lesson-sources">
         <span className="eyebrow">EVIDENCE BEHIND THIS LESSON</span>

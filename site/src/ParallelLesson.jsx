@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import PlacementScene from './PlacementScene';
+import Sequence from './Sequence';
 import LessonSection from './LessonSection';
 import PlacementExplorer from './PlacementExplorer';
 import { MathFormula } from './Lesson';
@@ -81,7 +82,12 @@ export default function ParallelLesson() {
     ]}>
       <p>The default worth starting from is the smallest tensor-parallel degree where the model fits with genuine headroom for activations and the engine's own reserve, with data parallelism above that for throughput. Expert parallelism enters when the model is sparse enough that its experts dominate, which chapter three gave you the arithmetic to check.</p>
       <p>Proving it is chapter six's discipline applied to one factor. Run the same workload at two shard counts that both fit. If the larger one is slower, communication is charging more than parallelism pays, and you now have evidence rather than a preference.</p>
-      <div className="decision-flow"><span>Does it fit?</span><ArrowRight/><span>With headroom?</span><ArrowRight/><span>A/B shard counts</span><ArrowRight/><span>Keep the smaller</span></div>
+      <Sequence label="Choosing a placement" steps={[
+        { name: 'Does it fit?', question: 'Per device, not in aggregate.', detail: 'weights ÷ shards + cache' },
+        { name: 'With headroom?', question: 'Leave room for the rest.', detail: 'activations · workspace · reserve' },
+        { name: 'A/B shard counts', question: 'Two counts that both fit.', detail: 'same workload, same run' },
+        { name: 'Keep the smaller', question: 'If the larger is not faster.', detail: 'communication charged per step' },
+      ]}/>
       <div className="takeaway"><div><h3>The engineering habit</h3><p>Reach for the smallest placement that fits comfortably. Every extra rank is another device that everyone else waits for, and the cost of that does not appear in any capacity calculation.</p></div></div>
       <div className="lesson-sources">
         <span className="eyebrow">EVIDENCE BEHIND THIS LESSON</span>

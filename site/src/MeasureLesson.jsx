@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import Sequence from './Sequence';
 import LessonSection from './LessonSection';
 import StreamExplorer from './StreamExplorer';
 import { MathFormula } from './Lesson';
@@ -73,7 +74,12 @@ export default function MeasureLesson() {
       'Compare against your own baseline, not against someone else’s hardware.',
     ]}>
       <p>A result worth keeping records enough to be rerun: the exact tokenized workload and its length distribution, the engine version and every flag, the hardware and its topology, the arrival pattern, the concurrency, the measurement boundary, and the raw timestamps. All the metrics on this page are derived, so if you keep the timestamps you can recompute any of them later, including ones you did not think to report.</p>
-      <div className="decision-flow"><span>Workload</span><ArrowRight/><span>Boundary</span><ArrowRight/><span>Raw timestamps</span><ArrowRight/><span>Derived metrics</span></div>
+      <Sequence label="The measurement" steps={[
+        { name: 'Workload', question: 'What are you sending?', detail: 'prompts · concurrency · lengths' },
+        { name: 'Boundary', question: 'Where is the clock?', detail: 'client · gateway · server' },
+        { name: 'Raw timestamps', question: 'What did you actually record?', detail: 'arrival times, per token' },
+        { name: 'Derived metrics', question: 'What do they mean?', detail: 'TTFT · TPOT · ITL · goodput' },
+      ]}/>
       <div className="takeaway"><div><h3>The engineering habit</h3><p>Keep the raw timestamps. Every argument about which metric to use is recoverable from them, and no argument is recoverable from a summary someone already averaged.</p></div></div>
       <div className="lesson-sources">
         <span className="eyebrow">EVIDENCE BEHIND THIS LESSON</span>

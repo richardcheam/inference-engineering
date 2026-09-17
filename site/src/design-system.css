@@ -322,8 +322,8 @@
 .ds .takeaway { padding: var(--space-4); border-radius: var(--radius-md); gap: var(--space-3); max-width: var(--measure-wide); }
 .ds .takeaway h3 { font-size: var(--text-lg); margin-bottom: var(--space-2); }
 .ds .takeaway p { font-size: var(--text-base); line-height: var(--leading-snug); }
-.ds .decision-flow { gap: var(--space-2); margin: var(--space-4) 0; }
-.ds .decision-flow > span { font-size: var(--text-sm); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); }
+
+
 .ds .lesson-sources { margin-top: var(--space-6); }
 .ds .lesson-sources a { font-size: var(--text-sm); padding: var(--space-2) 0; }
 .ds .next-lesson { padding: var(--space-5); border-radius: var(--radius-md); margin-top: var(--space-7); }
@@ -601,7 +601,7 @@
 /* ---- Quieter chrome so the content carries the page --------------------- */
 .ds 
 .ds 
-.ds .decision-flow > span { background: var(--surface-sunk); border: var(--border); color: var(--text); }
+
 
 /* ---- Focus: visible, and on the system ---------------------------------- */
 .ds :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: var(--radius-sm); }
@@ -821,10 +821,7 @@
 
 .ds .token,
 .ds .kv-slot,
-.ds .decision-flow > span,
-.ds .section-label > span,
-.ds .lane-id,
-.ds .expert-grid > i { border-radius: var(--radius-sm); }
+
 
 /* Meter fills follow their track rather than squaring off inside it. */
 .ds .weight-track, .ds .ladder-track, .ds .lane-track, .ds .budget-meter,

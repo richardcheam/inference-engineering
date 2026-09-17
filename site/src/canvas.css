@@ -223,7 +223,6 @@ body,
 .ds .source-quote,
 .ds .next-lesson,
 .ds .scene-stage,
-.ds .decision-flow > span,
 .ds .foot-note,
 .ds .symptom-picker,
 .ds .goodput-panel,
@@ -257,7 +256,7 @@ body,
 .ds .comparison-pair > div + div { border-left: 0; }
 .ds .next-lesson { border: 0; border-top: 1px solid var(--rule-strong); border-radius: 0; padding-inline: 0; }
 .ds .foot-note { border: 0; padding: 0; color: var(--muted); }
-.ds .decision-flow > span { border-radius: 0; padding-inline: 0; }
+
 
 /* ---- §16 Tables read as editorial, not as a spreadsheet ------------------ */
 .ds .prose table { border: 0; }

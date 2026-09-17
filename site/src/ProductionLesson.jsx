@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import Sequence from './Sequence';
 import LessonSection from './LessonSection';
 
 export const productionToc = [
@@ -106,7 +107,12 @@ export default function ProductionLesson() {
     ]}>
       <p>It is worth saying plainly at the end. Nothing in these ten chapters is a benchmark result. The figures come from pinned configurations, tensor indices, inspected engine source, and arithmetic over those, each labelled with what kind of claim it is. No model has been loaded, no GPU has been measured, and no improvement has been demonstrated.</p>
       <p>That boundary is not a gap in the work; it is the work. An engineer who can predict a system's behaviour and say exactly which predictions remain untested is in a far better position than one holding benchmark numbers they cannot explain. When hardware arrives, every open item above becomes a specific experiment with a prediction already written down.</p>
-      <div className="decision-flow"><span>Analysis</span><ArrowRight/><span>Prediction</span><ArrowRight/><span>Measurement</span><ArrowRight/><span>Revised model</span></div>
+      <Sequence label="The loop" steps={[
+        { name: 'Analysis', question: 'What does the arithmetic say?', detail: 'bounds, from pinned numbers' },
+        { name: 'Prediction', question: 'Write it down before you run.', detail: 'a number you can be wrong about' },
+        { name: 'Measurement', question: 'What happened?', detail: 'same workload, real hardware' },
+        { name: 'Revised model', question: 'What did the gap teach you?', detail: 'the model, not the excuse' },
+      ]}/>
       <div className="takeaway"><div><h3>The engineering habit</h3><p>Write the prediction before the measurement, and keep both. The gap between them is the only thing that ever taught anyone how a system really works.</p></div></div>
       <div className="lesson-sources">
         <span className="eyebrow">EVIDENCE BEHIND THIS LESSON</span>

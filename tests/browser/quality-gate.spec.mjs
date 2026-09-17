@@ -1043,3 +1043,54 @@ test.describe('data marks are on the semantic palette', () => {
     }
   });
 });
+
+test.describe('relationships are composed, not punctuated', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  const ROUTES = ['#feasibility', '#hardware', '#reuse', '#engine', '#measure',
+    '#profile', '#parallel', '#quantize', '#speculate', '#production'];
+
+  test('no chapter falls back to a row of labels joined by arrows', async ({ page }) => {
+    // The first pass converted two of these and I recorded it as done; there
+    // were eight. This sweeps rather than samples.
+    for (const route of ROUTES) {
+      await page.goto('/' + route);
+      await page.waitForSelector('.article');
+      await page.waitForTimeout(200);
+      const m = await page.evaluate(() => ({
+        arrowRows: document.querySelectorAll('.decision-flow').length,
+        sequences: document.querySelectorAll('.sequence').length,
+      }));
+      expect(m.arrowRows, `${route} still has an arrow row`).toBe(0);
+      expect(m.sequences, `${route} lost its sequence`).toBeGreaterThan(0);
+    }
+  });
+
+  test('a sequence states what each stop answers, and transforms when narrow', async ({ page }) => {
+    await page.goto('/#profile');
+    await page.waitForSelector('.sequence');
+    const wide = await page.evaluate(() => {
+      const steps = [...document.querySelectorAll('.sequence-steps > li')];
+      return {
+        stops: steps.length,
+        allNumbered: steps.every(s => /^\d\d$/.test(s.querySelector('.sequence-number')?.innerText.trim() ?? '')),
+        allAnswered: steps.every(s => (s.querySelector('.sequence-question')?.innerText.trim().length ?? 0) > 5),
+        columns: getComputedStyle(document.querySelector('.sequence-steps')).gridTemplateColumns.split(' ').length,
+      };
+    });
+    expect(wide.stops).toBeGreaterThanOrEqual(3);
+    expect(wide.allNumbered, 'a stop lost its number').toBe(true);
+    expect(wide.allAnswered, 'a stop says what it is but not what it answers').toBe(true);
+    expect(wide.columns, 'the sequence is not laid out across the track').toBe(wide.stops);
+
+    // Module 14 §27: the relationship survives, the desktop geometry does not.
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.waitForTimeout(300);
+    const narrow = await page.evaluate(() => ({
+      columns: getComputedStyle(document.querySelector('.sequence-steps')).gridTemplateColumns.split(' ').length,
+      stops: document.querySelectorAll('.sequence-steps > li').length,
+    }));
+    expect(narrow.columns, 'the sequence was shrunk rather than transformed').toBe(1);
+    expect(narrow.stops, 'a stop was dropped on a phone').toBe(wide.stops);
+  });
+});

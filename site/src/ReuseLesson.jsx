@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import PhaseScene from './PhaseScene';
+import Sequence from './Sequence';
 import LessonSection from './LessonSection';
 import ReuseExplorer, { SparsityComparison } from './ReuseExplorer';
 import { MathFormula } from './Lesson';
@@ -78,7 +79,12 @@ export default function ReuseLesson() {
       'Routing statistics from the engine beat any uniform-routing model, including this one.',
     ]}>
       <p>Everything on this page is arithmetic over a routing model that assumes tokens choose experts independently and uniformly. Real routing does neither. The useful move is to hold context fixed, sweep the batch, and find the point where cost per token stops improving; the model here predicts roughly where that knee sits, and the distance between prediction and measurement tells you how far real routing is from uniform.</p>
-      <div className="decision-flow"><span>Reuse model</span><ArrowRight/><span>Predicted knee</span><ArrowRight/><span>Batch sweep</span><ArrowRight/><span>Routing counters</span></div>
+      <Sequence label="Checking the model" steps={[
+        { name: 'Reuse model', question: 'What does the arithmetic predict?', detail: 'uniform, independent routing' },
+        { name: 'Predicted knee', question: 'Where should cost flatten?', detail: 'experts touched per batch' },
+        { name: 'Batch sweep', question: 'Where does it flatten in fact?', detail: 'fixed context, rising batch' },
+        { name: 'Routing counters', question: 'Was the assumption true?', detail: 'real expert selection' },
+      ]}/>
       <div className="takeaway"><div><h3>The engineering habit</h3><p>When a vendor number describes one token, ask what it becomes at your batch size. Most of the surprising results in serving come from a per-token fact being quietly applied to a loaded server.</p></div></div>
       <div className="lesson-sources">
         <span className="eyebrow">EVIDENCE BEHIND THIS LESSON</span>

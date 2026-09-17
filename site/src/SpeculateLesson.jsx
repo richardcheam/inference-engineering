@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import Sequence from './Sequence';
 import LessonSection from './LessonSection';
 import SpeculateExplorer from './SpeculateExplorer';
 import SpeculateAnimation from './SpeculateAnimation';
@@ -76,7 +77,12 @@ export default function SpeculateLesson() {
       'Compare speculation on and off at the concurrency you actually serve.',
     ]}>
       <p>Acceptance depends on the draft model, the target model, the prompt distribution, the sampling temperature, and how much context is shared between requests. It is not a property of the technique. The measurement worth running is the plainest possible one: the same workload at the same concurrency, with the feature off and on, reporting acceptance alongside the latency change so the result explains itself.</p>
-      <div className="decision-flow"><span>Break-even rate</span><ArrowRight/><span>Measured acceptance</span><ArrowRight/><span>Off/on at real load</span><ArrowRight/><span>Keep or drop</span></div>
+      <Sequence label="Deciding on speculation" steps={[
+        { name: 'Break-even rate', question: 'What acceptance do you need?', detail: 'draft length · verify cost' },
+        { name: 'Measured acceptance', question: 'What do you actually get?', detail: 'on your prompts, your drafter' },
+        { name: 'Off/on at real load', question: 'Does it still pay when busy?', detail: 'spare compute disappears' },
+        { name: 'Keep or drop', question: 'One decision, written down.', detail: 'with the load it assumed' },
+      ]}/>
       <div className="takeaway"><div><h3>The engineering habit</h3><p>Compute the break-even acceptance before enabling the feature. It converts an open-ended tuning exercise into a single measurement with a threshold to compare against.</p></div></div>
       <div className="lesson-sources">
         <span className="eyebrow">EVIDENCE BEHIND THIS LESSON</span>

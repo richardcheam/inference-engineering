@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import Sequence from './Sequence';
 import LessonSection from './LessonSection';
 import DiagnoseExplorer from './DiagnoseExplorer';
 
@@ -70,7 +71,12 @@ export default function ProfileLesson() {
       'Record the baseline first; a fix with no baseline is a story.',
     ]}>
       <p>The workspace cheatsheet already ends with the right checklist, and it is worth repeating as the closing habit of this chapter: which workload, which constrained resource, which observation supports that, what else explains it, which metric should change, what experiment would disprove it, and what it costs in quality or operational complexity.</p>
-      <div className="decision-flow"><span>Symptom</span><ArrowRight/><span>Differential</span><ArrowRight/><span>Discriminating test</span><ArrowRight/><span>Mechanism</span></div>
+      <Sequence label="The differential" steps={[
+        { name: 'Symptom', question: 'What did you observe?', detail: 'measured, not suspected' },
+        { name: 'Differential', question: 'What could produce all of it?', detail: 'every mechanism that fits' },
+        { name: 'Discriminating test', question: 'What separates the survivors?', detail: 'the test that can embarrass you' },
+        { name: 'Mechanism', question: 'What was actually happening?', detail: 'one cause, with evidence' },
+      ]}/>
       <div className="takeaway"><div><h3>The engineering habit</h3><p>Write the counter-hypothesis down before you run the test. It is the cheapest protection against finding what you expected in data that did not contain it.</p></div></div>
       <div className="lesson-sources">
         <span className="eyebrow">EVIDENCE BEHIND THIS LESSON</span>
