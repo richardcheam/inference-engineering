@@ -882,6 +882,40 @@ test.describe('the token stream arrives', () => {
   });
 });
 
+test.describe('no native control chrome anywhere', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  // The playback scrub was redrawn first and the nine explorers were missed, so
+  // this sweeps every chapter rather than trusting one.
+  const ROUTES_WITH_CONTROLS = ['#feasibility', '#hardware', '#reuse', '#engine',
+    '#measure', '#profile', '#parallel', '#quantize', '#speculate'];
+
+  test('every slider and dropdown is drawn by the page, not the browser', async ({ page }) => {
+    for (const route of ROUTES_WITH_CONTROLS) {
+      await page.goto('/' + route);
+      await page.waitForSelector('.article');
+      await page.waitForTimeout(250);
+      const bad = await page.evaluate(() => {
+        const out = [];
+        for (const el of document.querySelectorAll('.ds input[type="range"]')) {
+          const cs = getComputedStyle(el);
+          if (cs.appearance !== 'none') out.push('range keeps native appearance');
+          if (cs.boxShadow !== 'none') out.push('range is raised');
+          // Without a published fraction the fill cannot be drawn.
+          if (el.style.getPropertyValue('--progress') === '') out.push('range has no --progress');
+        }
+        for (const el of document.querySelectorAll('.ds select')) {
+          const cs = getComputedStyle(el);
+          if (cs.appearance !== 'none') out.push('select keeps the OS arrows');
+          if (!cs.backgroundImage.includes('svg')) out.push('select has no drawn chevron');
+        }
+        return [...new Set(out)];
+      });
+      expect(bad, `${route}: ${bad.join('; ')}`).toEqual([]);
+    }
+  });
+});
+
 test.describe('the playback timeline is notation, not a slider', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 

@@ -188,6 +188,28 @@ export default function App() {
   },[]);
   useEffect(()=> { const listener=e=>{ if ((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k') {e.preventDefault();setSearch(v=>!v);} if(e.key==='Escape')setMenu(false); };window.addEventListener('keydown',listener);return()=>window.removeEventListener('keydown',listener);},[]);
   useEffect(()=> { document.documentElement.dataset.nav = navCollapsed ? 'collapsed' : 'open'; writePreference('atlas-nav-collapsed', navCollapsed); },[navCollapsed]);
+  // Every range input in the guide is drawn rather than left to the browser,
+  // and the drawn fill needs the value as a fraction. The inputs are plain
+  // uncontrolled elements scattered across nine explorers, so rather than
+  // thread a prop through each one, their fraction is published here as a
+  // custom property. Presentation only: if this never ran, the controls would
+  // still be a rule with a cap on it, just without the filled run.
+  useEffect(()=> {
+    const paint=input=>{
+      const min=Number(input.min||0), max=Number(input.max||100), value=Number(input.value);
+      const span=max-min;
+      input.style.setProperty('--progress', span > 0 ? (value-min)/span : 0);
+    };
+    const paintAll=()=>document.querySelectorAll('input[type="range"]').forEach(paint);
+    const onInput=event=>{ if(event.target.type==='range') paint(event.target); };
+    paintAll();
+    document.addEventListener('input', onInput, true);
+    // Explorers mount and unmount as chapters change and as tabs switch.
+    const observer=new MutationObserver(paintAll);
+    observer.observe(document.body,{ childList:true, subtree:true });
+    return ()=>{ document.removeEventListener('input', onInput, true); observer.disconnect(); };
+  },[]);
+
   // The masthead shares the canvas, so it needs no boundary until something
   // passes underneath it. Passive listener; no layout read per frame.
   useEffect(()=> {

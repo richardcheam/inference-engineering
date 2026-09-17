@@ -177,7 +177,9 @@ body,
 .ds .explorer input[type='text'],
 .ds .search-trigger,
 .ds .library-search {
-  background: var(--canvas-deep);
+  /* background-color, not the shorthand: the select's chevron is a background
+     image, and the shorthand would clear it from higher specificity. */
+  background-color: var(--canvas-deep);
   border: 1px solid var(--rule);
   border-radius: var(--radius-md);
 }
@@ -457,3 +459,98 @@ body,
    fixed width any more. */
 .brand-area { width: auto; }
 .brand { min-width: 0; }
+
+/* ============================================================================
+   Controls, drawn rather than inherited
+
+   The playback timeline was redrawn as notation, but every other slider in the
+   guide was still a native range input — grey rail, white circular thumb — and
+   every dropdown still carried the operating system's bevel and arrows. Nine
+   explorers' worth of settings-panel chrome sitting inside an editorial page.
+
+   The same language applies to all of them: a hairline that fills, a squared
+   cap at the value, and a chevron drawn in the page's own ink.
+   ========================================================================= */
+
+.ds input[type='range'] {
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  width: 100%;
+  height: auto;
+  background: none;
+  border: 0;
+  /* A hairline needs a target around it (§16). */
+  box-sizing: content-box;
+  padding-block: 1.125rem;
+  margin: 0;
+  cursor: pointer;
+  accent-color: auto;
+}
+
+.ds input[type='range']::-webkit-slider-runnable-track {
+  height: 2px;
+  border: 0;
+  border-radius: 0;
+  background-image:
+    linear-gradient(var(--identity), var(--identity)),
+    linear-gradient(var(--rule-strong), var(--rule-strong));
+  background-repeat: no-repeat, no-repeat;
+  background-size: calc(var(--progress, 0) * 100%) 2px, 100% 1px;
+  background-position: left center, left center;
+}
+.ds input[type='range']::-moz-range-track { height: 1px; border: 0; background: var(--rule-strong); }
+.ds input[type='range']::-moz-range-progress { height: 2px; border: 0; background: var(--identity); }
+
+/* The cap is the value. No marble, no bevel, no shadow. */
+.ds input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 3px;
+  height: 12px;
+  margin-top: -5px;
+  border: 0;
+  border-radius: 0;
+  background: var(--identity);
+  box-shadow: none;
+  transition: height var(--dur-ui, 180ms) ease, background var(--dur-ui, 180ms) ease;
+}
+.ds input[type='range']::-moz-range-thumb {
+  width: 3px;
+  height: 12px;
+  border: 0;
+  border-radius: 0;
+  background: var(--identity);
+  box-shadow: none;
+}
+.ds input[type='range']:hover::-webkit-slider-thumb,
+.ds input[type='range']:focus-visible::-webkit-slider-thumb { height: 16px; background: var(--ink); }
+.ds input[type='range']:hover::-moz-range-thumb,
+.ds input[type='range']:focus-visible::-moz-range-thumb { height: 16px; background: var(--ink); }
+
+/* ---- Dropdowns ----------------------------------------------------------
+   A select is a real control, so it keeps a surface — but the surface is the
+   page's, and the chevron is drawn in ink rather than supplied by the OS. */
+.ds select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--canvas-deep);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%236a6a66' stroke-width='1.25' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-3, 0.75rem) center;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  padding-inline: var(--space-3, 0.75rem) var(--space-6, 2rem);
+  color: var(--ink);
+  box-shadow: none;
+  cursor: pointer;
+}
+.ds select:hover { border-color: var(--rule-strong); }
+
+[data-theme='dark'] .ds select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%239b978e' stroke-width='1.25' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds input[type='range']::-webkit-slider-thumb { transition: none; }
+}
