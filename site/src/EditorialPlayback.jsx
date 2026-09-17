@@ -159,6 +159,10 @@ export default function EditorialPlayback({
     };
   }, [settingsOpen]);
 
+  // 0..1 along the timeline, handed to CSS so the fill is drawn rather than
+  // inherited from the browser's own slider rendering.
+  const progress = frame.total > 1 ? frame.frame / (frame.total - 1) : 0;
+
   const Icon = action === 'pause' ? Pause : action === 'replay' ? RotateCcw : Play;
   const verb = action === 'pause' ? 'Pause' : action === 'replay' ? 'Replay' : 'Play';
 
@@ -188,15 +192,28 @@ export default function EditorialPlayback({
         <span>{verb}</span>
       </button>
 
-      {/* §10 Scrubbing stays available and keyboard-operable, but is no longer
-          the main way to move: it is the fine adjustment under the stages. */}
-      <input className="playback-scrub" type="range"
-        min="0" max={Math.max(frame.total - 1, 0)} step="1" value={frame.frame}
-        aria-label={`Step through ${label}`}
-        onPointerDown={() => dispatchPlay({ type: 'scrub_start' })}
-        onPointerUp={() => dispatchPlay({ type: 'scrub_end' })}
-        onKeyDown={() => dispatchPlay({ type: 'inspect' })}
-        onChange={e => dispatchFrame({ type: 'seek', frame: Number(e.target.value) })}/>
+      {/* The control stays a range input, so it keeps its semantics, its
+          keyboard behaviour and its accessible name. Its native appearance is
+          discarded: the track is drawn from the progress fraction, so what the
+          reader sees is a rule that fills, not a slider with a knob. */}
+      <span className="playback-timeline" style={{ '--progress': progress }}>
+        <input className="playback-scrub" type="range"
+          min="0" max={Math.max(frame.total - 1, 0)} step="1" value={frame.frame}
+          aria-label={`Step through ${label}`}
+          aria-valuetext={stages.length ? `${stages[stageIndex]?.label}, step ${frame.frame + 1} of ${frame.total}` : `Step ${frame.frame + 1} of ${frame.total}`}
+          onPointerDown={() => dispatchPlay({ type: 'scrub_start' })}
+          onPointerUp={() => dispatchPlay({ type: 'scrub_end' })}
+          onKeyDown={() => dispatchPlay({ type: 'inspect' })}
+          onChange={e => dispatchFrame({ type: 'seek', frame: Number(e.target.value) })}/>
+        {/* Reads out only while the reader is actually moving the cursor. */}
+        <span className="playback-tick" aria-hidden="true">{String(frame.frame + 1).padStart(2, '0')}</span>
+      </span>
+
+      {/* §6 Without named stages there is no heading carrying the count, so it
+          sits beside the timeline instead. */}
+      {stages.length === 0 && <span className="playback-count beside">
+        {String(frame.frame + 1).padStart(2, '0')} / {String(frame.total).padStart(2, '0')}
+      </span>}
 
       {/* §12 Speed is secondary configuration, not a permanent readout. */}
       <div className="playback-settings" ref={settingsRef}>

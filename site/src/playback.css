@@ -117,15 +117,113 @@
 }
 .ds .playback-primary:hover { background: color-mix(in oklab, var(--identity) 9%, transparent); }
 
-/* §10 The scrub is the fine adjustment, not the main road. */
-.ds .playback-scrub {
+/* ---- The timeline -------------------------------------------------------
+   A range input, drawn as editorial notation rather than as a slider. The
+   native track, thumb, bevel and accent colour are all discarded; what remains
+   is a hairline that fills, and a cap at the filled end.
+
+   The fill is two backgrounds rather than one: the completed run is 2px of
+   ink, the remaining run 1px of rule, so the line reports progress by weight
+   as well as by colour. `--progress` comes from the component, because no
+   cross-browser selector exposes a range's value to CSS. */
+.ds .playback-timeline {
+  position: relative;
   flex: 1;
   min-width: 0;
-  box-sizing: content-box;
-  padding-block: 1.25rem;
-  margin-block: 0;
-  accent-color: var(--identity);
+  display: flex;
+  align-items: center;
 }
+
+.ds .playback-scrub {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  margin: 0;
+  /* A generous hit area around a hairline (§16). */
+  padding-block: 1.25rem;
+  box-sizing: content-box;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.ds .playback-scrub::-webkit-slider-runnable-track {
+  height: 2px;
+  border: 0;
+  border-radius: 0;
+  background-image:
+    linear-gradient(var(--identity), var(--identity)),
+    linear-gradient(var(--rule-strong), var(--rule-strong));
+  background-repeat: no-repeat, no-repeat;
+  background-size: calc(var(--progress, 0) * 100%) 2px, 100% 1px;
+  background-position: left center, left center;
+}
+.ds .playback-scrub::-moz-range-track {
+  height: 1px;
+  border: 0;
+  background: var(--rule-strong);
+}
+.ds .playback-scrub::-moz-range-progress { height: 2px; background: var(--identity); border: 0; }
+
+/* At rest the cap is the indicator: a short stroke closing the filled run,
+   not a knob sitting on top of it. */
+.ds .playback-scrub::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 3px;
+  height: 6px;
+  border: 0;
+  border-radius: 0;
+  background: var(--identity);
+  margin-top: -2px;
+  box-shadow: none;
+  transition: height var(--dur-ui, 180ms) ease, background var(--dur-ui, 180ms) ease;
+}
+.ds .playback-scrub::-moz-range-thumb {
+  width: 3px;
+  height: 6px;
+  border: 0;
+  border-radius: 0;
+  background: var(--identity);
+  box-shadow: none;
+  transition: height var(--dur-ui, 180ms) ease, background var(--dur-ui, 180ms) ease;
+}
+
+/* §3 On hover, focus or an active scrub the cap grows into a precise tick. */
+.ds .playback-timeline:hover .playback-scrub::-webkit-slider-thumb,
+.ds .playback-scrub:focus-visible::-webkit-slider-thumb,
+.ds .playback[data-mode='scrubbing'] .playback-scrub::-webkit-slider-thumb {
+  height: 14px;
+  background: var(--ink);
+}
+.ds .playback-timeline:hover .playback-scrub::-moz-range-thumb,
+.ds .playback-scrub:focus-visible::-moz-range-thumb,
+.ds .playback[data-mode='scrubbing'] .playback-scrub::-moz-range-thumb {
+  height: 14px;
+  background: var(--ink);
+}
+.ds .playback-scrub:focus { outline: none; }
+.ds .playback-scrub:focus-visible { outline: none; }
+
+/* The step number rides the tick, and only while it is out. */
+.ds .playback-tick {
+  position: absolute;
+  top: calc(50% + 0.75rem);
+  left: calc(var(--progress, 0) * 100%);
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-ui, 180ms) ease;
+}
+.ds .playback-timeline:hover .playback-tick,
+.ds .playback-scrub:focus-visible ~ .playback-tick,
+.ds .playback[data-mode='scrubbing'] .playback-tick { opacity: 1; }
+
+.ds .playback-count.beside { flex-shrink: 0; }
 
 /* ---- §12 Speed lives behind a quiet secondary control -------------------- */
 .ds .playback-settings { position: relative; }
@@ -250,4 +348,10 @@
   .ds .playback-primary,
   .ds .scenario-nav button { transition: none; }
   .ds .stage-rail > li.active .stage-mark { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds .playback-scrub::-webkit-slider-thumb,
+  .ds .playback-scrub::-moz-range-thumb,
+  .ds .playback-tick { transition: none; }
 }

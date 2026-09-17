@@ -881,3 +881,55 @@ test.describe('the token stream arrives', () => {
     expect(m.ttft.toLowerCase()).toContain('n/a');
   });
 });
+
+test.describe('the playback timeline is notation, not a slider', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test('no native range rendering survives', async ({ page }) => {
+    // Chrome exposes neither ::-webkit-slider-thumb nor its track to
+    // getComputedStyle, so the cap and rule are checked by eye against the
+    // screenshots in scratchpad/timeline. What is observable is asserted here:
+    // the browser is not drawing this control, and nothing is raised.
+    await page.goto('/#engine');
+    await page.waitForSelector('.playback-scrub');
+    const m = await page.evaluate(() => {
+      const cs = getComputedStyle(document.querySelector('.playback-scrub'));
+      return { appearance: cs.appearance, background: cs.backgroundColor,
+               shadow: cs.boxShadow, border: cs.borderTopWidth };
+    });
+    expect(m.appearance, 'the native slider appearance is back').toBe('none');
+    expect(m.background, 'the track has a rail behind it').toBe('rgba(0, 0, 0, 0)');
+    expect(m.shadow, 'the control is raised').toBe('none');
+    expect(m.border).toBe('0px');
+  });
+
+  test('the fill tracks the cursor, and the tick is revealed only on demand', async ({ page }) => {
+    await page.goto('/#engine');
+    await page.waitForSelector('.playback-timeline');
+    const progress = () => page.evaluate(() =>
+      parseFloat(getComputedStyle(document.querySelector('.playback-timeline')).getPropertyValue('--progress')));
+    const tickOpacity = () => page.evaluate(() =>
+      Number(getComputedStyle(document.querySelector('.playback-tick')).opacity));
+
+    await page.evaluate(() => document.querySelectorAll('.stage-rail li')[0].querySelector('button').click());
+    await page.waitForTimeout(250);
+    const atStart = await progress();
+
+    await page.evaluate(() => {
+      const items = document.querySelectorAll('.stage-rail li');
+      items[items.length - 1].querySelector('button').click();
+    });
+    await page.waitForTimeout(250);
+    const atEnd = await progress();
+
+    expect(atStart).toBeLessThan(0.2);
+    expect(atEnd).toBeGreaterThan(0.9);
+
+    await page.mouse.move(5, 5);
+    await page.waitForTimeout(300);
+    expect(await tickOpacity(), 'the scrub marker is showing at rest').toBe(0);
+    await page.hover('.playback-timeline');
+    await page.waitForTimeout(350);
+    expect(await tickOpacity(), 'the scrub marker never appears').toBe(1);
+  });
+});
