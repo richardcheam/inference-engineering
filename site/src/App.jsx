@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
-import { ArrowRight, ArrowUpRight, BookOpen, Bookmark, Box, ChartNoAxesCombined, Check, ChevronDown, ChevronLeft, Clock3, Command, Compass, Cpu, FileText, FunctionSquare, Info, Layers3, List, Map, Menu, Moon, NotebookPen, Radar, Search, Sun, Workflow, X } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, BookOpen, Bookmark, Box, ChartNoAxesCombined, Check, ChevronDown, ChevronLeft, Clock3, Command, Compass, Cpu, FileText, FunctionSquare, Info, Layers3, List, Map, Moon, NotebookPen, Radar, Search, Sun, Workflow, X } from 'lucide-react';
 import { allPages } from './content';
 import Lesson, { lessonToc, MemoryArt } from './Lesson';
 import HardwareLesson, { hardwareToc, RateArt } from './HardwareLesson';
@@ -33,6 +33,96 @@ const icons = { box: Box, layers: Layers3, cpu: Cpu, function: FunctionSquare, w
 function Icon({ name, ...props }) { const Component = icons[name] || BookOpen; return <Component {...props}/>; }
 function readPreference(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } }
 function writePreference(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} }
+/**
+ * What the masthead says about where the reader is (module 15 §8, §9).
+ *
+ * The middle of the masthead used to repeat Study / Library / Saved on every
+ * page. It now answers "where am I?" from the route's own metadata, which the
+ * content already carries — nothing here is invented for the header.
+ */
+/**
+ * The Index: the whole product, not the curriculum (module 15 §11, §12).
+ *
+ * It deliberately does not list chapters — that is the Field Guide's job, and
+ * duplicating it would give the reader two answers to the same question. Every
+ * destination here exists; nothing is listed aspirationally.
+ *
+ * Appearance lives here rather than in the masthead (§15): it is set once and
+ * then forgotten, so it does not deserve permanent space beside the reading.
+ */
+function IndexPanel({ open, close, theme, setTheme, savedCount }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return undefined;
+    if (open && !node.open) { node.showModal(); node.querySelector('a')?.focus(); }
+    if (!open && node.open) node.close();
+    return undefined;
+  }, [open]);
+
+  const sections = [
+    { name: 'Study', note: 'The Field Guide', links: [
+      { href: '#feasibility', label: 'Start at chapter one' },
+      { href: '#equations', label: 'The inference essentials' },
+    ] },
+    { name: 'Library', note: 'Everything, filed', links: [
+      { href: '#library', label: 'All resources' },
+      { href: '#models', label: 'Model snapshots' },
+      { href: '#hardware-reference', label: 'The device reference' },
+    ] },
+    { name: 'Field notes', note: 'Yours', links: [
+      { href: '#roadmap', label: 'Learning path' },
+      { href: '#bookmarks', label: savedCount ? `Saved · ${savedCount}` : 'Saved' },
+      { href: '#radar', label: 'Ecosystem radar' },
+    ] },
+    { name: 'About', note: 'How this was made', links: [
+      { href: '#about', label: 'About this guide' },
+      { href: '#sources', label: 'Follow the evidence' },
+      { href: '#decisions', label: 'Why we chose this approach' },
+    ] },
+  ];
+
+  return <dialog ref={ref} className="index-panel" onCancel={close}
+    onClick={e => { if (e.target === ref.current) close(); }} aria-label="Index">
+    <div className="index-inner">
+      <p className="index-label">INDEX</p>
+      <ol className="index-sections">
+        {sections.map((s, i) => <li key={s.name}>
+          <span className="index-number">{String(i + 1).padStart(2, '0')}</span>
+          <div>
+            <b className="index-name">{s.name}</b>
+            <small className="index-note">{s.note}</small>
+            <ul>
+              {s.links.map(l => <li key={l.href}>
+                <a href={l.href} onClick={close}>{l.label}</a>
+              </li>)}
+            </ul>
+          </div>
+        </li>)}
+      </ol>
+      <div className="index-appearance">
+        <span className="index-number">05</span>
+        <div>
+          <b className="index-name">Appearance</b>
+          <small className="index-note">Set once, then forgotten</small>
+          <button className="text-button" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+            {theme === 'light' ? 'Use the dark setting' : 'Use the light setting'}
+          </button>
+        </div>
+      </div>
+    </div>
+  </dialog>;
+}
+
+function mastheadContext(route, page, isChapter) {
+  if (route.id === 'home') return null;
+  if (route.id === 'library') return { eyebrow: 'LIBRARY', title: 'Concepts, figures and sources' };
+  if (route.id === 'bookmarks') return { eyebrow: 'FIELD NOTES', title: 'Saved' };
+  if (!page) return null;
+  if (isChapter) return { eyebrow: `${page.chapter} / ${page.short.toUpperCase()}`, title: page.title };
+  return { eyebrow: page.category.toUpperCase(), title: page.title };
+}
+
 function readRoute() { const [id, section] = window.location.hash.slice(1).split('~'); return { id: id || 'home', section }; }
 
 function SearchDialog({ open, close, opener }) {
@@ -55,7 +145,9 @@ function Sidebar({ id, open, close, collapsed, toggleCollapsed }) {
     { title: 'LEARN THE FOUNDATIONS', ids: ['feasibility','hardware','reuse','equations'] },
     { title: 'UNDERSTAND THE SYSTEM', ids: ['engine','measure','profile','parallel'] },
     { title: 'MAKE IT PRODUCTION', ids: ['quantize','speculate','production'] },
-    { title: 'YOUR FIELD NOTES', ids: ['roadmap','radar','sources'] },
+    // Module 15 §1 and §11: the Field Guide navigates the curriculum. The
+    // learning path, the radar and the source registry are the product, not
+    // the syllabus, and the Index carries them.
   ];
   return <><div className={`sidebar-backdrop ${open ? 'visible' : ''}`} onClick={close}/><aside className={`sidebar ${open ? 'open' : ''}`} aria-label="Topic navigation"><div className="sidebar-caption"><span>THE FIELD GUIDE</span><button className="nav-collapse" onClick={toggleCollapsed} aria-expanded={!collapsed} aria-controls="sidebar-nav" title={collapsed ? 'Expand navigation' : 'Collapse navigation'}><ChevronLeft size={14}/></button></div><div className="sidebar-scroll" id="sidebar-nav"><nav>{groups.map(group => <div className="nav-group" key={group.title}><h2>{group.title}</h2>{group.ids.map(pageId => { const p = allPages.find(p => p.id === pageId); return <a key={p.id} href={`#${p.id}`} className={id === p.id ? 'active' : ''} aria-current={id === p.id ? 'page' : undefined} onClick={close} title={collapsed ? p.short : undefined}><Icon name={p.icon} size={17}/><span>{p.short}</span>{id === p.id && <span className="active-dot"/>}</a>; })}</div>)}</nav></div><div className="sidebar-bottom"><a href="#library" className="sidebar-link" onClick={close} title={collapsed ? 'All resources' : undefined}><BookOpen size={16}/><span>All resources</span><em>{allPages.length}</em></a></div></aside></>;
 }
@@ -172,7 +264,23 @@ export default function App() {
   const page=allPages.find(p=>p.id===route.id);
   const isLibrary=route.id==='library'||route.id==='bookmarks';
   const isHome=route.id==='home';
+  const [indexOpen,setIndexOpen] = useState(false);
   const chapter=chapters[route.id];
+  const context=mastheadContext(route, page, !!chapter);
+
+  // On a phone the guide is a drawer, so this opens it. On a wide screen it is
+  // already on the page, so opening it means going to it: expand the rail if it
+  // was collapsed, then put focus on the current chapter. Either way the
+  // control does something the reader can see.
+  const revealFieldGuide=useCallback(()=>{
+    const wide=window.matchMedia('(min-width: 1025px)').matches;
+    if(!wide){ setMenu(v=>!v); return; }
+    setNavCollapsed(false);
+    requestAnimationFrame(()=>{
+      const nav=document.getElementById('sidebar-nav');
+      (nav?.querySelector('a.active') || nav?.querySelector('a'))?.focus();
+    });
+  },[]);
   const toc=chapter?chapter.toc:docToc;
   // Route changes go through a view transition so chapters cross-fade instead of
   // snapping. Falls back to a plain state update where unsupported or unwanted.
@@ -210,6 +318,19 @@ export default function App() {
     return ()=>{ document.removeEventListener('input', onInput, true); observer.disconnect(); };
   },[]);
 
+  // The bar is one row while studying on a laptop and two on a phone, so its
+  // height is measured rather than assumed. Everything that has to clear it
+  // reads `--topbar-height`.
+  useEffect(()=> {
+    const bar=document.querySelector('.topbar');
+    if(!bar) return;
+    const publish=()=>document.documentElement.style.setProperty('--topbar-height',`${Math.round(bar.getBoundingClientRect().height)}px`);
+    publish();
+    const observer=new ResizeObserver(publish);
+    observer.observe(bar);
+    return ()=>observer.disconnect();
+  },[]);
+
   // The masthead shares the canvas, so it needs no boundary until something
   // passes underneath it. Passive listener; no layout read per frame.
   useEffect(()=> {
@@ -224,7 +345,21 @@ export default function App() {
   useEffect(()=>{ document.title=route.id==='home'?'Inference Engineering · A field guide':`${page?.title || (route.id==='bookmarks'?'Saved resources':'The library')} · Inference Engineering`; setMenu(false); if(!route.section)window.scrollTo({top:0,behavior:'instant'}); },[route.id]);
   useEffect(()=>{ if(route.section) { const timer=setTimeout(()=>document.getElementById(route.section)?.scrollIntoView({behavior:'instant',block:'start'}),80);return()=>clearTimeout(timer);} },[route,docToc]);
   const toggleBookmark=()=>setBookmarks(current=>{const next=current.includes(route.id)?current.filter(id=>id!==route.id):[...current,route.id];writePreference('atlas-bookmarks',next);return next;});
-  return <><a className="skip-link" href="#main-content" onClick={e=>{e.preventDefault();document.getElementById('main-content')?.focus();}}>Skip to content</a><header className="topbar"><div className="brand-area">{!isHome&&<button className="icon-button mobile-menu" aria-label={menu?'Close navigation':'Open navigation'} aria-expanded={menu} onClick={()=>setMenu(v=>!v)}>{menu?<X size={21}/>:<Menu size={21}/>}</button>}<a className="brand" href="#home"><span className="brand-mark"><span/><span/><span/></span><span>inference<span className="brand-light">engineering</span><small>A FIELD GUIDE</small></span></a></div><nav className="topnav" aria-label="Main navigation"><a href="#feasibility" className={!isLibrary&&!isHome?'active':''}>Study</a><a href="#library" className={route.id==='library'?'active':''}>Library</a><a href="#bookmarks" className={route.id==='bookmarks'?'active':''}>Saved{bookmarks.length>0&&<span>{bookmarks.length}</span>}</a></nav><div className="top-actions"><button ref={searchButton} className="search-trigger" aria-label="Search the atlas" onClick={()=>setSearch(true)}><Search size={16}/><span>Search anything</span><kbd><Command size={10}/> K</kbd></button><button className="icon-button theme-toggle" aria-label={theme==='light'?'Switch to dark mode':'Switch to light mode'} onClick={()=>setTheme(theme==='light'?'dark':'light')}>{theme==='light'?<Moon size={18}/>:<Sun size={18}/>}</button></div></header>
+  return <><a className="skip-link" href="#main-content" onClick={e=>{e.preventDefault();document.getElementById('main-content')?.focus();}}>Skip to content</a><header className="topbar"><div className="brand-area"><a className="brand" href="#home"><span className="brand-mark"><span/><span/><span/></span><span>inference<span className="brand-light">engineering</span><small>A FIELD GUIDE</small></span></a></div>{context
+      ? <button className="masthead-context" onClick={revealFieldGuide} aria-expanded={menu}
+          aria-controls="sidebar-nav" aria-label={`Open the Field Guide. You are reading ${context.title}`}>
+          <span className="context-where">{context.eyebrow}</span>
+          <span className="context-title">{context.title}</span>
+          <span className="context-hint" aria-hidden="true">Field Guide</span>
+        </button>
+      : <span className="masthead-context is-empty"/>}<div className="top-actions">
+      <button ref={searchButton} className="search-trigger" aria-label="Search the guide" onClick={()=>setSearch(true)}>
+        <span>Search</span><kbd><Command size={10}/> K</kbd>
+      </button>
+      <button className="index-trigger" aria-expanded={indexOpen} aria-label="Open the index"
+        onClick={()=>setIndexOpen(v=>!v)}>Index</button>
+    </div></header>
+    <IndexPanel open={indexOpen} close={()=>setIndexOpen(false)} theme={theme} setTheme={setTheme} savedCount={bookmarks.length}/>
     {!isHome&&<Sidebar id={route.id} open={menu} close={()=>setMenu(false)} collapsed={navCollapsed} toggleCollapsed={()=>setNavCollapsed(v=>!v)}/>}
     <main id="main-content" tabIndex="-1" className={`workspace ds ${isLibrary?'wide':''} ${isHome?'at-home':''}`}>
       {route.id==='home'?<Home/>:isLibrary?<Library bookmarksOnly={route.id==='bookmarks'} bookmarks={bookmarks}/>:page?<SectionProvider pageId={page.id} ids={chapter?chapter.toc.map(t=>t.id):[]} focus={route.section}><div className="reading-layout"><article className="article"><div className={`article-header ${chapter?'lesson-header':''}`}><div className="article-heading"><span className="kicker">{page.kicker||page.category.toUpperCase()+' · FIELD NOTES'}</span><h1>{page.title}</h1><p className="page-description">{page.description}</p><div className="article-meta"><span><Clock3 size={13}/>{page.time} read</span><button className={`save-button ${bookmarks.includes(page.id)?'saved':''}`} onClick={toggleBookmark} aria-pressed={bookmarks.includes(page.id)}>{bookmarks.includes(page.id)?<Check size={14}/>:<Bookmark size={14}/>} {bookmarks.includes(page.id)?'Saved':'Save'}</button>{chapter&&<SectionControls/>}</div></div>{chapter&&<chapter.Art/>}</div>{chapter?<><chapter.Body/></>:<Markdown doc={page} onToc={onToc}/>}</article><TableOfContents id={route.id} toc={toc}/></div><TocDrawer id={route.id} toc={toc}/></SectionProvider>:<div className="not-found"><h1>This page isn’t in the atlas.</h1><p>The link may have changed. All current material is in the library.</p><a href="#library" className="inline-link">Explore the library <ArrowRight size={16}/></a></div>}

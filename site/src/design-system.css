@@ -264,7 +264,6 @@
 }
 .ds .explorer-heading { padding: var(--space-3) var(--space-4); }
 .ds .explorer-heading > div { font-size: var(--text-sm); font-weight: var(--weight-semi); }
-.ds 
 .ds .explorer-controls { padding: var(--space-4); gap: var(--space-4); }
 .ds .explorer-controls > label { font-size: var(--text-sm); color: var(--text); }
 .ds .explorer select { font-size: var(--text-sm); height: 2.25rem; border-radius: var(--radius-sm); }
@@ -331,8 +330,6 @@
 .ds .next-lesson p { font-size: var(--text-sm); }
 
 /* ---- Page furniture ----------------------------------------------------- */
-.ds 
-.ds 
 .ds .kicker { font-size: var(--text-xs); letter-spacing: 0.06em; margin-bottom: var(--space-3); }
 .ds .article-meta { font-size: var(--text-sm); gap: var(--space-3); }
 .ds .article-header { margin-bottom: var(--space-6); }
@@ -345,7 +342,6 @@
   margin: 0 0 var(--space-5);
 }
 .ds .section-control { font-size: var(--text-xs); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); }
-.ds 
 .ds .tab-strip button { font-size: var(--text-sm); padding: var(--space-3); }
 .ds .transport-events p { font-size: var(--text-sm); line-height: var(--leading-snug); }
 .ds .transport-step { font-size: var(--text-sm); }
@@ -371,9 +367,7 @@
 /* WCAG 2.5.8 target size: inline links and small controls need real height. */
 .ds .assumptions a,
 .ds .inline-link,
-.ds 
 .ds .text-button { font-size: var(--text-sm); padding: var(--space-2) var(--space-2); }
-.ds 
 .ds .save-button { font-size: var(--text-sm); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); min-height: 2rem; }
 
 /* ---- Responsive --------------------------------------------------------- */
@@ -485,7 +479,6 @@
 .ds .precision-row small, .ds .precision-row > span { font-size: var(--text-xs); }
 .ds .all-models > p, .ds .goodput-panel > p, .ds .hit-gap > p { font-size: var(--text-xs); }
 .ds .section-control { min-height: 2rem; }
-.ds 
 
 @media (max-width: 640px) {
   .ds .prose p, .ds .prose li { font-size: var(--text-base); }
@@ -599,8 +592,6 @@
 .ds .next-lesson .eyebrow { color: var(--accent); }
 
 /* ---- Quieter chrome so the content carries the page --------------------- */
-.ds 
-.ds 
 
 
 /* ---- Focus: visible, and on the system ---------------------------------- */

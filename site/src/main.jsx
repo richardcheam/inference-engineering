@@ -13,6 +13,7 @@ import './scene.css';
 import './canvas.css';
 import './playback.css';
 import './sequence.css';
+import './masthead.css';
 import App from './App';
 import ErrorBoundary from './ErrorBoundary';
 

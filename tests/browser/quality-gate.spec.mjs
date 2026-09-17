@@ -1138,3 +1138,152 @@ test.describe('the device trade-off states its claim with real objects', () => {
     expect(m.claim, 'the claim is missing').toBeGreaterThan(80);
   });
 });
+
+/* ==========================================================================
+   Module 15 — the contextual masthead and the Field Guide
+   ========================================================================== */
+
+test.describe('the masthead says where you are, not what you can click', () => {
+  test('context replaces the generic nav on every route', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+
+    // §2: the old row is gone everywhere, not only on the page I looked at.
+    for (const route of ['home', 'feasibility', 'hardware', 'reuse', 'equations',
+                         'engine', 'measure', 'profile', 'parallel', 'quantize',
+                         'speculate', 'production', 'roadmap', 'radar', 'sources',
+                         'library', 'bookmarks']) {
+      await page.goto(`/#${route}`);
+      await page.waitForTimeout(250);
+      const m = await page.evaluate(() => {
+        const ctx = document.querySelector('.masthead-context:not(.is-empty)');
+        return {
+          oldNav: document.querySelectorAll('.topnav > a').length,
+          hamburger: !!document.querySelector('.mobile-menu'),
+          eyebrow: ctx?.querySelector('.context-where')?.innerText || null,
+          title: ctx?.querySelector('.context-title')?.innerText || null,
+          opensGuide: ctx?.getAttribute('aria-controls') || null,
+          name: ctx?.getAttribute('aria-label') || null,
+          search: !!document.querySelector('.search-trigger'),
+          index: !!document.querySelector('.index-trigger'),
+        };
+      });
+      expect(m.oldNav, `Study / Library / Saved survives on #${route}`).toBe(0);
+      expect(m.hamburger, `a generic hamburger survives on #${route}`).toBe(false);
+      // §26: search stays reachable from every page.
+      expect(m.search && m.index, `a utility is missing on #${route}`).toBe(true);
+
+      if (route === 'home') {
+        // §8: the home masthead carries the publication, not a location.
+        expect(m.title, 'home invents a location').toBe(null);
+        continue;
+      }
+      expect(m.title, `#${route} does not say where the reader is`).toBeTruthy();
+      expect(m.eyebrow, `#${route} has no section`).toBeTruthy();
+      // §21: a semantic control with a name that says what it opens.
+      expect(m.opensGuide).toBe('sidebar-nav');
+      expect(m.name).toMatch(/^Open the Field Guide/);
+      // §10: the affordance is not a chevron.
+      expect(m.title).not.toMatch(/[▾▼⌄]/);
+    }
+  });
+
+  test('the context block reveals the Field Guide and lands focus in it', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/#hardware');
+    await page.waitForSelector('.masthead-context');
+    // Collapsed rail: clicking the context must bring the curriculum back.
+    await page.click('.nav-collapse');
+    await page.waitForTimeout(250);
+    expect(await page.evaluate(() => document.documentElement.dataset.nav)).toBe('collapsed');
+    await page.click('.masthead-context');
+    await page.waitForTimeout(300);
+    const wide = await page.evaluate(() => ({
+      collapsed: document.documentElement.dataset.nav === 'collapsed',
+      inGuide: !!document.activeElement.closest('#sidebar-nav'),
+      onCurrent: document.activeElement.classList.contains('active'),
+    }));
+    expect(wide.collapsed, 'the Field Guide stayed collapsed').toBe(false);
+    expect(wide.inGuide, 'focus did not move into the Field Guide').toBe(true);
+    expect(wide.onCurrent, 'focus did not land on the current lesson').toBe(true);
+
+    // §19: on a phone the same control is how the drawer opens.
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/#hardware');
+    await page.waitForTimeout(400);
+    expect(await page.locator('.sidebar.open').count()).toBe(0);
+    await page.click('.masthead-context');
+    await page.waitForTimeout(300);
+    expect(await page.locator('.sidebar.open').count(), 'the drawer did not open').toBe(1);
+  });
+
+  test('the Field Guide is revealed on the one canvas', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/#hardware');
+    await page.waitForSelector('.sidebar');
+    const m = await page.evaluate(() => {
+      const cs = getComputedStyle(document.querySelector('.sidebar'));
+      return { bg: cs.backgroundColor, shadow: cs.boxShadow, border: cs.borderRightWidth, radius: cs.borderRadius };
+    });
+    // §7: no wall, no card, no drawer material.
+    expect(m.bg, 'the Field Guide paints its own background').toMatch(/rgba\(0, 0, 0, 0\)|transparent/);
+    expect(m.shadow, 'the Field Guide floats').toBe('none');
+    expect(m.border, 'the Field Guide is a vertical wall').toBe('0px');
+  });
+
+  test('the Index reveals the product and does not repeat the curriculum', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/#hardware');
+    await page.click('.index-trigger');
+    await page.waitForTimeout(300);
+    const m = await page.evaluate(() => {
+      const panel = document.querySelector('.index-panel');
+      const links = [...panel.querySelectorAll('.index-sections a')];
+      const guide = [...document.querySelectorAll('#sidebar-nav a')].map(a => a.innerText.trim());
+      const cs = getComputedStyle(panel);
+      return {
+        open: panel.open,
+        sections: [...panel.querySelectorAll('.index-name')].map(e => e.innerText.trim()),
+        numbered: panel.querySelectorAll('.index-number').length,
+        lessonsRepeated: links.filter(a => guide.includes(a.innerText.trim())).length,
+        bg: cs.backgroundColor,
+        radius: cs.borderRadius,
+        canTheme: !!panel.querySelector('.index-appearance button'),
+      };
+    });
+    expect(m.open).toBe(true);
+    // §11 and §12: whole product, numbered, and not a second Field Guide.
+    expect(m.sections).toEqual(expect.arrayContaining(['Study', 'Library', 'Field notes', 'About']));
+    expect(m.numbered).toBeGreaterThanOrEqual(4);
+    expect(m.lessonsRepeated, 'the Index repeats Field Guide lessons').toBe(0);
+    // §12: one canvas, an editorial layer rather than a floating dropdown.
+    expect(m.radius).toBe('0px');
+    // §15: appearance lives here rather than in the masthead.
+    expect(m.canTheme, 'Appearance is not reachable from the Index').toBe(true);
+    expect(await page.locator('.topbar .theme-toggle').count(), 'the theme toggle is still in the masthead').toBe(0);
+
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(200);
+    expect(await page.evaluate(() => document.querySelector('.index-panel').open)).toBe(false);
+  });
+
+  test('the bar is as tall as what it holds, at every width', async ({ page }) => {
+    for (const width of [375, 768, 1024, 1280, 1440, 1920, 2560]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/#hardware');
+      await page.waitForTimeout(350);
+      const m = await page.evaluate(() => {
+        const bar = document.querySelector('.topbar').getBoundingClientRect();
+        const title = document.querySelector('.context-title').getBoundingClientRect();
+        const work = document.querySelector('.workspace').getBoundingClientRect();
+        return {
+          clipped: title.bottom > bar.bottom + 1,
+          hidden: work.top < bar.bottom - 1,
+          overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        };
+      });
+      expect(m.clipped, `the title is clipped by the bar at ${width}px`).toBe(false);
+      expect(m.hidden, `content sits under the bar at ${width}px`).toBe(false);
+      expect(m.overflow, `the masthead overflows at ${width}px`).toBeLessThanOrEqual(0);
+    }
+  });
+});

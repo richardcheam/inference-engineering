@@ -1,0 +1,234 @@
+/* ============================================================================
+   Contextual masthead — module 15
+
+   The middle of the masthead repeated Study / Library / Saved on every page,
+   which answered "what can I click?" rather than "where am I?". It now carries
+   the reader's position, and that position is the control that reveals the
+   Field Guide: the concept is the controller.
+
+   §17: a deliberate three-region grid aligned to the page shell, not a
+   space-between row.
+   ========================================================================= */
+
+.topbar {
+  display: grid;
+  grid-template-columns: var(--left-rail) minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--col-gap, 2rem);
+}
+
+/* ---- Context: where the reader is, and how the curriculum opens ---------- */
+/* The block is only as wide as what it says, so the affordance it grows is the
+   width of the words rather than of the column. */
+.ds .masthead-context,
+.masthead-context {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: start;
+  align-items: baseline;
+  column-gap: var(--space-3, 0.75rem);
+  width: max-content;
+  max-width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: var(--space-2, 0.5rem) 0;
+  min-width: 0;
+  cursor: pointer;
+}
+.masthead-context.is-empty { cursor: default; }
+
+.context-where {
+  grid-column: 1 / -1;
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.context-title {
+  margin-top: 2px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-snug);
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: inset 0 -1px 0 transparent;
+  transition: color var(--dur-ui, 180ms) ease, box-shadow var(--dur-ui, 180ms) ease;
+}
+
+/* §10: no chevron. The affordance is the title answering, and one word saying
+   what opens — absent at rest, present on hover or focus. */
+.context-hint {
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--identity);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity var(--dur-ui, 180ms) ease;
+}
+.masthead-context:hover .context-title,
+.masthead-context:focus-visible .context-title {
+  color: var(--identity);
+  box-shadow: inset 0 -1px 0 var(--identity);
+}
+.masthead-context:hover .context-hint,
+.masthead-context:focus-visible .context-hint { opacity: 1; }
+
+/* ---- Utilities: quiet, and not an input at rest (§14) -------------------- */
+.top-actions { display: flex; align-items: center; gap: var(--space-4, 1rem); }
+
+.ds .search-trigger,
+.search-trigger,
+.index-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  min-height: 2.75rem;
+  padding: var(--space-2, 0.5rem) 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  /* The legacy rule reserved 205px, which pushed the shortcut to the far edge
+     and made the pair read as an empty field. It is two words wide. */
+  min-width: 0;
+  cursor: pointer;
+  box-shadow: inset 0 -1px 0 transparent;
+  transition: color var(--dur-ui, 180ms) ease, box-shadow var(--dur-ui, 180ms) ease;
+}
+.search-trigger:hover,
+.index-trigger:hover { color: var(--ink); box-shadow: inset 0 -1px 0 var(--identity); }
+.index-trigger[aria-expanded='true'] { color: var(--identity); box-shadow: inset 0 -1px 0 var(--identity); }
+.search-trigger kbd {
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  color: var(--muted);
+  background: none;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 0;
+}
+
+/* The legacy stylesheet hid the word below 1020px and left an empty button.
+   §14 wants the word at every width; it is the input chrome that goes. */
+.ds .search-trigger > span,
+.search-trigger > span { display: inline; }
+
+/* ---- §19 Mobile: brand and Index, with context on its own line ----------- */
+@media (max-width: 52rem) {
+  .topbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'brand utils' 'context context';
+    row-gap: var(--space-1, 0.25rem);
+    padding-block: var(--space-2, 0.5rem);
+  }
+  .brand-area { grid-area: brand; }
+  .top-actions { grid-area: utils; }
+  .masthead-context { grid-area: context; padding-top: 0; }
+  .masthead-context.is-empty { display: none; }
+  .search-trigger kbd { display: none; }
+
+  /* The bar is two rows here, so it is as tall as what it holds. The legacy
+     fixed height clipped the lesson title to its eyebrow. */
+  .ds .topbar,
+  .topbar { height: auto; }
+
+  /* §19: no hamburger. The contextual chapter block is how the Field Guide is
+     reached, so a second, generic control for the same drawer is chrome. */
+  .mobile-menu { display: none; }
+
+}
+
+/* ---- The Index: an editorial layer, not a dropdown (§12) ----------------- */
+.index-panel {
+  border: 0;
+  padding: 0;
+  background: var(--canvas);
+  color: var(--graphite);
+  max-width: min(100%, 64rem);
+  width: 100%;
+  margin: 0 auto;
+  max-height: 100dvh;
+}
+.index-panel::backdrop { background: color-mix(in oklab, var(--ink) 34%, transparent); }
+.index-inner {
+  padding: clamp(2rem, 6vw, 5rem) var(--page-gutter, 2rem);
+  max-width: var(--technical);
+  margin-inline: auto;
+}
+.index-label {
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin: 0 0 var(--space-6, 2rem);
+}
+.index-sections { list-style: none; margin: 0; padding: 0; }
+.index-sections > li,
+.index-appearance {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  gap: var(--space-4, 1rem);
+  padding: var(--space-5, 1.5rem) 0;
+  border-top: 1px solid var(--rule);
+}
+.index-number {
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.index-name {
+  display: block;
+  font-family: var(--display);
+  font-size: var(--text-md);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+.index-note {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  color: var(--muted);
+}
+.index-sections ul { list-style: none; margin: var(--space-4, 1rem) 0 0; padding: 0; display: grid; gap: var(--space-2, 0.5rem); }
+.index-sections ul a {
+  color: var(--graphite);
+  font-size: var(--text-sm);
+  box-shadow: inset 0 -1px 0 transparent;
+  transition: color var(--dur-ui, 180ms) ease, box-shadow var(--dur-ui, 180ms) ease;
+}
+.index-sections ul a:hover { color: var(--identity); box-shadow: inset 0 -1px 0 var(--identity); }
+.index-appearance .text-button { margin-top: var(--space-4, 1rem); }
+
+@media (prefers-reduced-motion: reduce) {
+    .context-hint,
+  .search-trigger,
+  .index-trigger,
+  .index-sections ul a { transition: none; }
+}
+
+/* ---- The bar is now as tall as what it holds ----------------------------- */
+/* Two rows on narrow screens, one on wide, so the offsets everything else
+   uses cannot be a hard-coded 78/66px. `--topbar-height` is republished from
+   the measured bar, and these rules point the legacy offsets at it. */
+.ds .workspace,
+.workspace {
+  margin-top: var(--topbar-height);
+  min-height: calc(100dvh - var(--topbar-height));
+}
+.sidebar { top: var(--topbar-height); }
+.sidebar-backdrop.visible { top: var(--topbar-height); }
