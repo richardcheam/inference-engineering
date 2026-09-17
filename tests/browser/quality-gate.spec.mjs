@@ -1179,9 +1179,12 @@ test.describe('the masthead says where you are, not what you can click', () => {
       }
       expect(m.title, `#${route} does not say where the reader is`).toBeTruthy();
       expect(m.eyebrow, `#${route} has no section`).toBeTruthy();
-      // §21: a semantic control with a name that says what it opens.
-      expect(m.opensGuide).toBe('sidebar-nav');
-      expect(m.name).toMatch(/^Open the Field Guide/);
+      // §21: a semantic control with a name that says what it opens, and §11:
+      // it opens the structure this page actually belongs to.
+      expect(m.opensGuide, `#${route} points at no structure`).toMatch(/^(sidebar-nav|index-panel)$/);
+      expect(m.name).toMatch(
+        m.opensGuide === 'sidebar-nav' ? /^Open the Field Guide/ : /^Open the Index/);
+      expect(m.name, `#${route} does not say where the reader is`).toContain(m.title);
       // §10: the affordance is not a chevron.
       expect(m.title).not.toMatch(/[▾▼⌄]/);
     }
@@ -1214,6 +1217,60 @@ test.describe('the masthead says where you are, not what you can click', () => {
     await page.click('.masthead-context');
     await page.waitForTimeout(300);
     expect(await page.locator('.sidebar.open').count(), 'the drawer did not open').toBe(1);
+  });
+
+  test('aria-expanded describes the structure the control governs', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/#hardware');
+    await page.waitForSelector('.masthead-context');
+    const state = () => page.evaluate(() => {
+      const c = document.querySelector('.masthead-context');
+      return { expanded: c.getAttribute('aria-expanded'), controls: c.getAttribute('aria-controls') };
+    });
+    // The rail is there, so the guide is expanded — it used to report the phone
+    // drawer's state and say "false" while the curriculum was on screen.
+    expect(await state()).toEqual({ expanded: 'true', controls: 'sidebar-nav' });
+    await page.click('.nav-collapse');
+    await page.waitForTimeout(250);
+    expect((await state()).expanded, 'collapsed, but still reported as open').toBe('false');
+    await page.click('.masthead-context');
+    await page.waitForTimeout(250);
+    expect((await state()).expanded).toBe('true');
+
+    // §11: a page the Field Guide does not list opens the Index instead, and
+    // the state it reports is the Index's.
+    for (const route of ['sources', 'roadmap', 'radar', 'library', 'bookmarks']) {
+      await page.goto(`/#${route}`);
+      await page.waitForTimeout(300);
+      expect((await state()), `#${route} sends the reader to a guide without it`)
+        .toEqual({ expanded: 'false', controls: 'index-panel' });
+      await page.click('.masthead-context');
+      await page.waitForTimeout(300);
+      expect(await page.evaluate(() => document.querySelector('.index-panel').open)).toBe(true);
+      expect((await state()).expanded).toBe('true');
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(150);
+    }
+  });
+
+  test('the drawer band has no second control of its own', async ({ page }) => {
+    // 761-1024: the sidebar is a drawer here too, and the hamburger that used
+    // to be its only opener is gone.
+    for (const width of [768, 900, 1024]) {
+      await page.setViewportSize({ width, height: 800 });
+      // An identical URL is a same-document navigation, which would carry the
+      // previous iteration's open drawer over.
+      await page.goto('about:blank');
+      await page.goto('/#hardware');
+      await page.waitForTimeout(400);
+      expect(await page.locator('.mobile-menu').count(), `a hamburger survives at ${width}px`).toBe(0);
+      expect(await page.locator('.sidebar.open').count(),
+        `the drawer is already open at ${width}px`).toBe(0);
+      await page.click('.masthead-context');
+      await page.waitForTimeout(350);
+      expect(await page.locator('.sidebar.open').count(),
+        `the Field Guide cannot be opened at ${width}px`).toBe(1);
+    }
   });
 
   test('the Field Guide is revealed on the one canvas', async ({ page }) => {
@@ -1303,5 +1360,22 @@ test.describe('the masthead says where you are, not what you can click', () => {
       expect(m.hidden, `content sits under the bar at ${width}px`).toBe(false);
       expect(m.overflow, `the masthead overflows at ${width}px`).toBeLessThanOrEqual(0);
     }
+  });
+});
+
+test.describe('the masthead under reduced motion', () => {
+  test.use({ viewport: { width: 900, height: 800 }, reducedMotion: 'reduce' });
+
+  test('the Field Guide arrives rather than travels, and still opens', async ({ page }) => {
+    await page.goto('/#hardware');
+    await page.waitForSelector('.masthead-context');
+    const moving = await page.evaluate(() => {
+      const t = getComputedStyle(document.querySelector('.sidebar')).transitionDuration;
+      return t.split(',').some(d => parseFloat(d) > 0);
+    });
+    expect(moving, 'the drawer still slides under reduced motion').toBe(false);
+    await page.click('.masthead-context');
+    await page.waitForTimeout(200);
+    expect(await page.locator('.sidebar.open').count(), 'reduced motion cost the reader the guide').toBe(1);
   });
 });

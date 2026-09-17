@@ -391,9 +391,8 @@
    collapse at narrower widths, so the drawer now starts at 1024px.
    ========================================================================= */
 @media (min-width: 761px) and (max-width: 1024px) {
-  .mobile-menu { display: flex; }
-  /* The brand area is a fixed 218px column above 760px, which the hamburger
-     then overlaps. Lay it out as a row, as the phone breakpoint already does. */
+  /* Module 15 §19: the hamburger is gone; the contextual chapter block is what
+     opens the drawer in this range. */
   .brand-area { width: auto; display: flex; align-items: center; gap: var(--space-3); }
   .sidebar {
     top: var(--topbar-height);
@@ -737,11 +736,6 @@
 /* ---- Masthead ------------------------------------------------------------ */
 .topbar { height: var(--topbar-height); padding: 0 var(--space-5); border-bottom: var(--border); }
 .brand small { font-size: var(--text-xs); letter-spacing: 0.08em; margin-top: var(--space-2); color: var(--muted); }
-.topnav { font-size: var(--text-sm); gap: var(--space-5); }
-.topnav > a { color: var(--muted); }
-.topnav > a.active { color: var(--accent); font-weight: var(--weight-semi); }
-.topnav > a.active:after { background: var(--accent); }
-.topnav a > span { font-size: var(--text-xs); background: var(--accent-soft); color: var(--accent-ink); border-radius: var(--radius-sm); padding: 1px var(--space-2); }
 .search-trigger {
   font-size: var(--text-sm);
   border: var(--border);
@@ -751,8 +745,6 @@
   color: var(--muted);
 }
 .search-trigger kbd { font-size: var(--text-xs); border-radius: var(--radius-sm); padding: 1px var(--space-1); }
-.icon-button { padding: var(--space-2); border-radius: var(--radius-sm); min-width: 2.25rem; min-height: 2.25rem; }
-.icon-button:hover { background: var(--surface-sunk); color: var(--accent); }
 .nav-collapse { width: 1.75rem; height: 1.75rem; }
 
 /* ---- Search dialog ------------------------------------------------------- */
@@ -821,7 +813,7 @@
 .ds .ledger-bar > span, .ds .model-meter > span { border-radius: var(--radius-pill); }
 
 /* Chrome */
-.sidebar-link, .nav-group a, .search-trigger, .icon-button,
+.sidebar-link, .nav-group a, .search-trigger,
 .nav-collapse, .toc-fold, .fan-picker button { border-radius: var(--radius-md); }
 .search-dialog { border-radius: var(--radius-lg); }
 .toc-sheet { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }

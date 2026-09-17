@@ -215,10 +215,14 @@
 .index-appearance .text-button { margin-top: var(--space-4, 1rem); }
 
 @media (prefers-reduced-motion: reduce) {
-    .context-hint,
+  .context-hint,
   .search-trigger,
   .index-trigger,
   .index-sections ul a { transition: none; }
+  /* §20 and §21: revealing the curriculum is still a reveal, but it arrives
+     rather than travels. The drawer's slide was the one piece of masthead
+     motion with no reduced-motion answer. */
+  .sidebar { transition: none !important; }
 }
 
 /* ---- The bar is now as tall as what it holds ----------------------------- */

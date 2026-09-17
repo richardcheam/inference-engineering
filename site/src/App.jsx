@@ -82,7 +82,7 @@ function IndexPanel({ open, close, theme, setTheme, savedCount }) {
     ] },
   ];
 
-  return <dialog ref={ref} className="index-panel" onCancel={close}
+  return <dialog ref={ref} id="index-panel" className="index-panel" onCancel={close}
     onClick={e => { if (e.target === ref.current) close(); }} aria-label="Index">
     <div className="index-inner">
       <p className="index-label">INDEX</p>
@@ -114,13 +114,19 @@ function IndexPanel({ open, close, theme, setTheme, savedCount }) {
   </dialog>;
 }
 
+/*
+ * Module 15 §5 and §11: the context is the control, and it opens the structure
+ * the page actually belongs to. A lesson opens the Field Guide, which lists it.
+ * The library, the saved notes and the reference pages are the product rather
+ * than the curriculum, so they open the Index, which is where they live.
+ */
 function mastheadContext(route, page, isChapter) {
   if (route.id === 'home') return null;
-  if (route.id === 'library') return { eyebrow: 'LIBRARY', title: 'Concepts, figures and sources' };
-  if (route.id === 'bookmarks') return { eyebrow: 'FIELD NOTES', title: 'Saved' };
+  if (route.id === 'library') return { eyebrow: 'LIBRARY', title: 'Concepts, figures and sources', opens: 'index' };
+  if (route.id === 'bookmarks') return { eyebrow: 'FIELD NOTES', title: 'Saved', opens: 'index' };
   if (!page) return null;
-  if (isChapter) return { eyebrow: `${page.chapter} / ${page.short.toUpperCase()}`, title: page.title };
-  return { eyebrow: page.category.toUpperCase(), title: page.title };
+  if (isChapter) return { eyebrow: `${page.chapter} / ${page.short.toUpperCase()}`, title: page.title, opens: 'guide' };
+  return { eyebrow: page.category.toUpperCase(), title: page.title, opens: 'index' };
 }
 
 function readRoute() { const [id, section] = window.location.hash.slice(1).split('~'); return { id: id || 'home', section }; }
@@ -272,9 +278,18 @@ export default function App() {
   // already on the page, so opening it means going to it: expand the rail if it
   // was collapsed, then put focus on the current chapter. Either way the
   // control does something the reader can see.
+  // On a laptop the rail is always there and the control expands it; on a phone
+  // it is a drawer. §21 wants aria-expanded to describe whichever of those the
+  // reader is actually looking at, so the width is state rather than a guess.
+  const [wide,setWide] = useState(()=>window.matchMedia('(min-width: 1025px)').matches);
+  useEffect(()=>{
+    const query=window.matchMedia('(min-width: 1025px)');
+    const listener=e=>setWide(e.matches);
+    query.addEventListener('change',listener);
+    return ()=>query.removeEventListener('change',listener);
+  },[]);
   const revealFieldGuide=useCallback(()=>{
-    const wide=window.matchMedia('(min-width: 1025px)').matches;
-    if(!wide){ setMenu(v=>!v); return; }
+    if(!window.matchMedia('(min-width: 1025px)').matches){ setMenu(v=>!v); return; }
     setNavCollapsed(false);
     requestAnimationFrame(()=>{
       const nav=document.getElementById('sidebar-nav');
@@ -346,11 +361,14 @@ export default function App() {
   useEffect(()=>{ if(route.section) { const timer=setTimeout(()=>document.getElementById(route.section)?.scrollIntoView({behavior:'instant',block:'start'}),80);return()=>clearTimeout(timer);} },[route,docToc]);
   const toggleBookmark=()=>setBookmarks(current=>{const next=current.includes(route.id)?current.filter(id=>id!==route.id):[...current,route.id];writePreference('atlas-bookmarks',next);return next;});
   return <><a className="skip-link" href="#main-content" onClick={e=>{e.preventDefault();document.getElementById('main-content')?.focus();}}>Skip to content</a><header className="topbar"><div className="brand-area"><a className="brand" href="#home"><span className="brand-mark"><span/><span/><span/></span><span>inference<span className="brand-light">engineering</span><small>A FIELD GUIDE</small></span></a></div>{context
-      ? <button className="masthead-context" onClick={revealFieldGuide} aria-expanded={menu}
-          aria-controls="sidebar-nav" aria-label={`Open the Field Guide. You are reading ${context.title}`}>
+      ? <button className="masthead-context"
+          onClick={context.opens==='index'?()=>setIndexOpen(v=>!v):revealFieldGuide}
+          aria-expanded={context.opens==='index'?indexOpen:(wide?!navCollapsed:menu)}
+          aria-controls={context.opens==='index'?'index-panel':'sidebar-nav'}
+          aria-label={`Open the ${context.opens==='index'?'Index':'Field Guide'}. You are reading ${context.title}`}>
           <span className="context-where">{context.eyebrow}</span>
           <span className="context-title">{context.title}</span>
-          <span className="context-hint" aria-hidden="true">Field Guide</span>
+          <span className="context-hint" aria-hidden="true">{context.opens==='index'?'Index':'Field Guide'}</span>
         </button>
       : <span className="masthead-context is-empty"/>}<div className="top-actions">
       <button ref={searchButton} className="search-trigger" aria-label="Search the guide" onClick={()=>setSearch(true)}>
