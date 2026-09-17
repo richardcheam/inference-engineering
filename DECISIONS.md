@@ -217,3 +217,29 @@ control. One player serves all three living examples.
 
 **Revisit when:** a page gains two living examples close enough together that
 prominence alone does not choose well between them.
+
+## 2026-09-17 · Relationships are composed, not punctuated
+
+**Context:** ten chapters ended on a row of labels joined by arrows, and the
+homepage repeated the pattern in miniature as ten one-line glosses. The arrow
+carried the whole relationship and the gaps between labels held nothing.
+
+**Decision:** every chapter now closes on a numbered sequence naming what each
+step answers and what it is made of, laid out on one continuous rule.
+Chapter seven additionally states its claim with the objects themselves: a bay
+overflowing at 779 GB against a 141 GB device, eight bays holding 97 GB each,
+and the seven synchronisations per step that buys.
+
+**Why:** an arrow between two labels asserts a relationship without showing it,
+and is indistinguishable from a relationship that does not hold. A stop that
+says what it answers can be checked. Where real numbers exist, the object is a
+better argument than a diagram of one, and every figure in the trade-off comes
+from `placeMemory`, so it cannot drift from the explorer beside it.
+
+**Kept:** arrows where direction is the information — `text → tokens`, the two
+chart axis labels, the reuse change from three to forty-seven per cent, and
+every link and fold control.
+
+**Revisit when:** a relationship appears that is genuinely a branch, a loop or
+a feedback cycle. The sequence grammar suits ordered investigations and is the
+wrong shape for those.

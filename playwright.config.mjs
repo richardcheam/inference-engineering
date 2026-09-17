@@ -4,9 +4,9 @@ const CI = !!process.env.CI;
 
 /**
  * Browser tests cover what `node --test` cannot: the built page's composition.
- * They encode the Phase 8 quality gate from
- * `fashion_engineering_frontend_skill/RESPONSIVE_REFACTOR_TASK.md`, so the gate
- * can be re-run instead of re-measured by hand.
+ * They encode the design system's quality gate, recorded in
+ * `docs/superpowers/specs/2026-09-16-design-system.md`, so it can be re-run
+ * rather than re-measured by hand.
  *
  * Uses the installed Chrome rather than a downloaded browser build, so the
  * suite runs without a 150 MB first-run download.

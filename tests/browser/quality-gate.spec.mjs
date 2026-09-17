@@ -3,10 +3,13 @@ import { test, expect } from '@playwright/test';
 /**
  * The Phase 8 quality gate, as a suite.
  *
- * Every assertion here corresponds to a line of the gate in
- * `fashion_engineering_frontend_skill/RESPONSIVE_REFACTOR_TASK.md` or to a rule
- * from the modules it points at. They were all verified by hand during the
- * refactor; encoding them means a later change cannot quietly undo one.
+ * Every assertion corresponds to a rule of the design system, recorded in
+ * `docs/superpowers/specs/2026-09-16-design-system.md`. Each was verified by
+ * hand once; encoding them means a later change cannot quietly undo one.
+ *
+ * Section numbers in the comments below refer to the design briefs these rules
+ * came from. Those briefs are development material and are not part of this
+ * repository; the spec above carries what they decided.
  */
 
 const ROUTES = [

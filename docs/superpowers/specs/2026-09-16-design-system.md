@@ -89,8 +89,9 @@ the sidebar becomes a drawer up to 1024px, and the brand area lays out as a row 
 
 ## Adaptive responsiveness — Phase 7 validation and Phase 8 quality gate
 
-Source of requirements: `fashion_engineering_frontend_skill/RESPONSIVE_REFACTOR_TASK.md`,
-`11_adaptive_responsive_layout.md`, `09_critique_and_quality_gate.md`.
+Source of requirements: the adaptive-layout and quality-gate briefs. Those are
+development material and are not part of this repository; what they decided is
+recorded here.
 Implementation lives in `site/src/adaptive.css`, loaded last.
 
 ### Phase 7 — measured, 11 viewports × 17 routes (187 combinations)
@@ -491,7 +492,8 @@ figure ends, at all seven desktop widths.
 
 ## Scroll scene pilot
 
-Per `inference_atlas_scroll_motion_v1/SCROLL_ANIMATION_PILOT_TASK.md`.
+Per the scroll-storytelling brief, which is development material and not part
+of this repository.
 
 **Phase 1 inspection.** No animation dependency existed: React 19 and CSS only.
 Motion infrastructure already present was `motion.css` (spring `linear()` curves,
@@ -809,3 +811,53 @@ frame as one and loses the stall stage rather than faking it.
 Validated at 375, 768, 1440, 1920 and 2560: autoplay on entry at every width,
 the stage rail turning from a row of columns into a stacked list below 40rem, no
 horizontal overflow, and no control under 28px.
+
+## Relationships and concept diagrams
+
+### Audit
+
+Classified every arrow rather than deleting them wholesale. Eight rows of
+`A → B → C` at the end of chapters, plus ten one-line glosses on the homepage
+index. Kept: `text → tokens`, two chart axis labels, a three-to-forty-seven per
+cent change, and the link and fold icons, where direction or navigation is real.
+
+The first pass converted two rows and recorded the work as finished. There were
+eight: the audit's output had been truncated and the visible part taken for the
+whole. The sweep in the gate now checks all ten chapters rather than sampling,
+which is the check that would have caught it.
+
+### Grammars built
+
+**`Sequence`** — a numbered editorial sequence on one continuous rule. Each stop
+carries a number, a name, the question it answers, and what it is made of.
+Direction comes from position. Used by all ten chapters: the screen, the
+investigation, checking the model, the experiment, the measurement, the
+differential, choosing a placement, before you quantize, deciding on
+speculation, the loop.
+
+**`Tradeoff`** — cause, transformation, consequence, carried by the objects
+rather than by labels. One device overflowing, eight holding the same
+checkpoint, and the synchronisations that buys. Colour appears once, on the
+consequence, because it is the only stage that is news. Every figure is
+`placeMemory`, the same function the explorer and the scroll scene in that
+chapter run.
+
+Both transform rather than shrink below 52rem: the rule turns from a line across
+the top into one down the side, and no stop is dropped.
+
+### A contract that needed updating
+
+Setting the chapter conclusion apart — narrower, stepped in from the left —
+broke an assertion that callouts match the prose measure. That contract was
+right before and is not now, so the test records the exception and why. Third
+time in this work that the gate caught a deliberate change and the right answer
+was to update the contract rather than revert the design.
+
+### Known and deliberately not fixed
+
+About 2 KB of dead CSS remains, roughly one per cent of the stylesheet: rules
+for `transport-*`, `scenario-picker` and `phase-rail`, whose components were
+replaced. An attempt to remove them with a regex over the stylesheets damaged a
+comment boundary and broke the navigation's active state; it was reverted. The
+rules are inert, and a second attempt with the same tool would risk the design
+again for a cosmetic gain. Removing them safely needs a real CSS parser.
