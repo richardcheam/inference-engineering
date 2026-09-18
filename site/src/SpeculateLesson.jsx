@@ -56,10 +56,10 @@ export default function SpeculateLesson() {
       'There is a specific acceptance rate below which the feature is a slowdown.',
     ]}>
       <p>Set acceptance high and lengthen the draft: the speedup climbs. Now drop acceptance and lengthen it again. The same control that helped now hurts, because every extra drafted token costs time and returns almost nothing.</p>
-      <SpeculateExplorer figure="14"/>
+      <SpeculateExplorer figure="15"/>
       <p>The break-even acceptance rate is the number worth carrying away. Below it, turning speculation on makes your server slower while every dashboard still shows it working exactly as designed.</p>
       <p>The arithmetic is easier to trust once you have watched a round happen. Step through one: four guesses, one verification pass, and a commit that keeps the accepted prefix and discards everything after the first mistake.</p>
-      <SpeculateAnimation figure="15"/>
+      <SpeculateAnimation figure="16"/>
       <p>Drag acceptance to zero and step through again. Every draft is thrown away, and the round still emits one token, since the verification pass produces it regardless. That floor is why speculation degrades gracefully instead of failing, and why a low acceptance rate costs you time rather than correctness.</p>
     </LessonSection>
 

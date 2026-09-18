@@ -18,7 +18,10 @@ playwright-report/
 .playwright-mcp/
 .audit/
 
-# Agent development harness: design briefs, skill packs and prompt material.
-# Local only. These shape how the site was built; they are not part of it.
+# Personal design inventory: harness, skill packs, art-direction packs, design
+# briefs, audits and their screenshots. Local only. These shape how the site was
+# built and record how it looks; they are not part of the published site.
 harness/
 .claude/
+inference_atlas_art_direction_ii_pack/
+design-audit/

@@ -225,6 +225,11 @@
   .sidebar { transition: none !important; }
 }
 
+/* Anchor navigation has to clear the bar, and the bar is measured rather than
+   assumed. `styles.css` hard-codes 108px, which is 5px short of the 113px the
+   bar actually occupies on a phone, so a section arrived tucked under it. */
+html { scroll-padding-top: calc(var(--topbar-height, 78px) + 1.5rem); }
+
 /* ---- The bar is now as tall as what it holds ----------------------------- */
 /* Two rows on narrow screens, one on wide, so the offsets everything else
    uses cannot be a hard-coded 78/66px. `--topbar-height` is republished from
@@ -248,3 +253,33 @@
 [data-theme='dark'] .nav-group a.active { color: var(--identity); }
 [data-theme='dark'][data-nav='collapsed'] .nav-group a.active { box-shadow: inset 2px 0 0 var(--identity); }
 [data-theme='dark'] .sidebar-bottom { background: none; }
+
+
+/* ============================================================================
+   Publication rule: a chapter's hero artifact may own the canvas.
+
+   While one is the active scene, global floating utilities recede rather than
+   sit on top of the drawing. They return the moment the reader leaves it, and
+   they are never removed — `visibility` is what makes the retracted control
+   unreachable by keyboard, so a hidden control can never take focus.
+
+   Set by the artifact itself (see DivisionField). Lives here because the rule
+   is about the publication's furniture, not about any one chapter.
+   ========================================================================= */
+html[data-hero-scene] .toc-fab {
+  transform: translateY(150%);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform var(--dur-panel, 320ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)),
+              opacity var(--dur-ui, 240ms) ease,
+              visibility 0s linear var(--dur-panel, 320ms);
+}
+.toc-fab {
+  transition: transform var(--dur-panel, 320ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)),
+              opacity var(--dur-ui, 240ms) ease,
+              visibility 0s;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-hero-scene] .toc-fab,
+  .toc-fab { transition: none; }
+}

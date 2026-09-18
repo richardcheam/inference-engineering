@@ -1615,3 +1615,279 @@ test.describe('search under reduced motion', () => {
     expect(await page.evaluate(() => document.activeElement.matches('.search-results > a'))).toBe(true);
   });
 });
+
+/* ==========================================================================
+   Chapter 07 · H1 — the division field
+   Art Direction II pilot. These assert the integrity contract, which is the
+   whole claim of the figure: two quantities on one axis, neither corrupting
+   the other's scale.
+   ========================================================================== */
+
+test.describe('the division field keeps its quantities separate', () => {
+  const setD = (page, i) => page.evaluate(idx => {
+    const el = document.querySelector('.df-scale-input');
+    const set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    set.call(el, String(idx));
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  }, i);
+
+  const open = async page => {
+    await page.goto('/#parallel');
+    await page.waitForSelector('.division-field');
+    await page.evaluate(() => document.querySelector('.division-field').scrollIntoView());
+    await page.waitForTimeout(400);
+  };
+
+  test('width encodes nothing: blocks are identical at every device count', async ({ page }) => {
+    await page.setViewportSize({ width: 1512, height: 950 });
+    await open(page);
+    const widths = [];
+    for (const i of [0, 1, 2, 3, 4]) {
+      await setD(page, i);
+      await page.waitForTimeout(250);
+      widths.push(await page.evaluate(() => {
+        const b = [...document.querySelectorAll('.df-device')].map(e => e.getBoundingClientRect().width);
+        return { count: b.length, distinct: new Set(b.map(w => w.toFixed(2))).size, w: +b[0].toFixed(2) };
+      }));
+    }
+    // Within a state every block is the same width...
+    for (const s of widths) expect(s.distinct, 'blocks differ in width within one state').toBe(1);
+    // ...and across states the width does not move, so it cannot be read as a
+    // quantity. If this fails, width has started encoding the data.
+    const unique = new Set(widths.map(s => s.w));
+    expect(unique.size, `block width changed across device counts: ${[...unique].join(', ')}`).toBe(1);
+    expect(widths.map(s => s.count)).toEqual([1, 2, 4, 8, 16]);
+  });
+
+  test('the sync register is a count, and the count is D - 1', async ({ page }) => {
+    await page.setViewportSize({ width: 1512, height: 950 });
+    await open(page);
+    for (const [i, devices] of [[0, 1], [1, 2], [2, 4], [3, 8], [4, 16]]) {
+      await setD(page, i);
+      await page.waitForTimeout(250);
+      const m = await page.evaluate(() => ({
+        blocks: document.querySelectorAll('.df-device').length,
+        marks: document.querySelectorAll('.df-sync').length,
+        // Each mark is numbered in house notation; the numbers are the evidence.
+        numbers: [...document.querySelectorAll('.df-sync-n')].map(e => e.innerText.trim()),
+        note: document.querySelector('.df-sync-register .df-register-note').innerText,
+        tickSizes: new Set([...document.querySelectorAll('.df-sync-tick')]
+          .map(e => `${e.getBoundingClientRect().width.toFixed(1)}x${e.getBoundingClientRect().height.toFixed(1)}`)).size,
+      }));
+      expect(m.blocks).toBe(devices);
+      expect(m.marks, `sync marks are not D-1 at D=${devices}`).toBe(devices - 1);
+      // The count is stated by the marks themselves, numbered 01..D-1.
+      expect(m.numbers.length).toBe(devices - 1);
+      if (devices > 1) {
+        expect(m.numbers[0]).toBe('01');
+        expect(m.numbers[m.numbers.length - 1]).toBe(String(devices - 1).padStart(2, '0'));
+        expect(m.note).toContain(String(devices - 1));
+      }
+      // Every tick is identical: a count, never a length carrying a distance.
+      if (m.marks > 1) expect(m.tickSizes, 'sync marks vary in size').toBe(1);
+    }
+  });
+
+  test('the figures are placeMemory, not hand-written', async ({ page }) => {
+    await page.setViewportSize({ width: 1512, height: 950 });
+    await open(page);
+    await setD(page, 3);
+    await page.waitForTimeout(250);
+    const read = () => page.evaluate(() => {
+      const byLabel = want => [...document.querySelectorAll('.df-reading')]
+        .find(r => r.querySelector('.df-reading-label')?.innerText.trim() === want)
+        ?.querySelector('.df-reading-value')?.innerText.trim();
+      return {
+        perDevice: byLabel('PER DEVICE'),
+        weights: byLabel('WEIGHTS / DEVICE'),
+        cache: byLabel('CACHE / DEVICE'),
+        copies: document.querySelectorAll('.df-copy').length,
+        copyNote: document.querySelector('.df-copies-register .df-register-note').innerText,
+        replicated: document.querySelector('.df-copies-register').dataset.replicated || null,
+      };
+    });
+    const eight = await read();
+    expect(eight.perDevice).toMatch(/^97\.4/);
+    expect(eight.weights).toMatch(/^94\.5/);
+    // One whole copy of the live cache at eight devices.
+    expect(eight.copies).toBe(1);
+    expect(eight.copyNote).toContain('23.6');
+    expect(eight.replicated).toBe(null);
+
+    await setD(page, 4);
+    await page.waitForTimeout(250);
+    const sixteen = await read();
+    // Per-device halves while a second whole copy of the cache appears: the
+    // chapter's event, and the reason the copies are a count rather than a bar.
+    expect(sixteen.perDevice).toMatch(/^50\.2/);
+    expect(sixteen.weights).toMatch(/^47\.2/);
+    expect(sixteen.cache).toBe(eight.cache);   // the cache stopped dividing
+    expect(sixteen.copies, 'replication is not shown as a second whole copy').toBe(2);
+    expect(sixteen.copyNote).toContain('47.1');
+    expect(sixteen.replicated).toBe('true');
+  });
+
+  test('the statement never states more than the model', async ({ page }) => {
+    await page.setViewportSize({ width: 1512, height: 950 });
+    await open(page);
+    await setD(page, 3);
+    await page.waitForTimeout(250);
+    const m = await page.evaluate(() => ({
+      statement: document.querySelector('.df-statement').innerText.replace(/\s+/g, ' ').trim(),
+      status: document.querySelector('.df-status').innerText.replace(/\s+/g, ' ').trim(),
+    }));
+    expect(m.statement).toBe('Eight devices. Seven synchronisation points.');
+    // Display type is read as the strongest assertion on the page, so the words
+    // that would promote a modelled count into a measured duration are banned
+    // from it. They remain allowed in body prose, where they are qualified.
+    expect(m.statement).not.toMatch(/\b(wait|waits|latency|delay|slower)\b/i);
+    expect(m.status).toContain('MODELLED');
+    expect(m.status).toContain('not a measurement of time');
+  });
+
+  test('the capacity datum is a reference, never a control', async ({ page }) => {
+    await page.setViewportSize({ width: 1512, height: 950 });
+    await open(page);
+    const m = await page.evaluate(() => {
+      const d = document.querySelector('.df-datum');
+      const scale = document.querySelector('.df-scale-input');
+      return {
+        datumTabbable: d.matches('a, button, input, [tabindex]'),
+        datumPointer: getComputedStyle(d).pointerEvents,
+        datumHidden: d.getAttribute('aria-hidden'),
+        scaleIsRange: scale.type === 'range',
+        scaleHeight: Math.round(scale.getBoundingClientRect().height),
+        valuetext: scale.getAttribute('aria-valuetext'),
+      };
+    });
+    // Focus is expressed through the scale's own current tick, not a container
+    // outline. It still has to be unmistakable.
+    await page.focus('.df-scale-input');
+    await page.waitForTimeout(350);
+    const focus = await page.evaluate(() => {
+      const tick = document.querySelector('.df-stops .current .df-stop-tick');
+      const t = getComputedStyle(tick);
+      const idle = document.querySelector('.df-stops li:not(.current) .df-stop-tick');
+      return {
+        outline: getComputedStyle(document.activeElement).outlineStyle,
+        colour: t.backgroundColor,
+        grew: parseFloat(t.height) > parseFloat(getComputedStyle(idle).height) * 2,
+        ring: t.boxShadow !== 'none',
+      };
+    });
+    expect(focus.outline, 'a generic input outline came back').toBe('none');
+    expect(focus.colour, 'the focused stop is not on the identity colour').toBe('rgb(60, 84, 64)');
+    expect(focus.grew, 'the focused stop is not visibly distinct').toBe(true);
+    expect(focus.ring).toBe(true);
+    expect(m.datumTabbable).toBe(false);
+    expect(m.datumPointer).toBe('none');
+    expect(m.datumHidden).toBe('true');
+    expect(m.scaleIsRange, 'the device scale lost its semantic control').toBe(true);
+    expect(m.scaleHeight, 'the device scale is below the touch target floor').toBeGreaterThanOrEqual(44);
+    expect(m.valuetext).toMatch(/modelled synchronisation points/);
+  });
+
+  test('no state at any width widens the page', async ({ page }) => {
+    for (const width of [375, 430, 768, 1024, 1280, 1512, 1728, 1920, 2560]) {
+      await page.setViewportSize({ width, height: 950 });
+      await open(page);
+      for (const i of [0, 2, 4]) {
+        await setD(page, i);
+        await page.waitForTimeout(200);
+        const over = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+        expect(over, `the division field widened the page at ${width}px, state ${i}`).toBeLessThanOrEqual(0);
+      }
+    }
+  });
+});
+
+test.describe('the division field under reduced motion', () => {
+  test.use({ viewport: { width: 1512, height: 950 }, reducedMotion: 'reduce' });
+
+  test('a new state is committed immediately', async ({ page }) => {
+    await page.goto('/#parallel');
+    await page.waitForSelector('.division-field');
+    await page.evaluate(() => {
+      document.querySelector('.division-field').scrollIntoView();
+      const el = document.querySelector('.df-scale-input');
+      const set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+      set.call(el, '4');
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await page.waitForTimeout(50);   // an animation would still be mid-flight
+    const m = await page.evaluate(() => ({
+      marks: document.querySelectorAll('.df-sync').length,
+      markOpacity: getComputedStyle(document.querySelector('.df-sync')).opacity,
+      deviceAnimation: getComputedStyle(document.querySelector('.df-device')).animationName,
+      bandTransition: getComputedStyle(document.querySelector('.df-weights')).transitionDuration,
+    }));
+    expect(m.marks).toBe(15);
+    expect(m.markOpacity).toBe('1');
+    expect(m.deviceAnimation).toBe('none');
+    expect(m.bandTransition).toBe('0s');
+  });
+});
+
+test.describe('a hero artifact may ask floating utilities to recede', () => {
+  test.use({ viewport: { width: 430, height: 932 } });
+
+  test('the on-this-page control retracts over the field and returns after it', async ({ page }) => {
+    await page.goto('/#parallel');
+    await page.waitForSelector('.division-field');
+    const state = () => page.evaluate(() => {
+      const fab = document.querySelector('.toc-fab');
+      const cs = getComputedStyle(fab);
+      return { scene: document.documentElement.dataset.heroScene || null, visibility: cs.visibility };
+    });
+    // Before: the utility is present and usable.
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(600);
+    expect(await state()).toEqual({ scene: null, visibility: 'visible' });
+
+    // While the drawing owns the viewport it recedes — and being `visibility:
+    // hidden` it cannot take keyboard focus while it is off the canvas.
+    await page.evaluate(() => document.querySelector('.division-field').scrollIntoView({ block: 'center' }));
+    await page.waitForTimeout(800);
+    expect(await state()).toEqual({ scene: 'division-field', visibility: 'hidden' });
+
+    // After: restored. Section navigation is never permanently removed.
+    await page.evaluate(() => window.scrollBy(0, 2400));
+    await page.waitForTimeout(800);
+    expect(await state()).toEqual({ scene: null, visibility: 'visible' });
+
+    // Leaving the chapter clears it too, so no other page inherits the state.
+    await page.goto('/#hardware');
+    await page.waitForTimeout(800);
+    expect(await page.evaluate(() => document.documentElement.dataset.heroScene || null)).toBe(null);
+  });
+
+  test('the rotated field composes: label above the datum, indices on the bands', async ({ page }) => {
+    await page.goto('/#parallel');
+    await page.waitForSelector('.division-field');
+    await page.evaluate(() => document.querySelector('.df-statement').scrollIntoView({ block: 'start' }));
+    await page.waitForTimeout(600);
+    const m = await page.evaluate(() => {
+      const q = s => document.querySelector(s).getBoundingClientRect();
+      const bar = q('.topbar'), st = q('.df-statement');
+      const datum = q('.df-datum'), label = q('.df-datum-label'), frame = q('.df-frame');
+      const cells = [...document.querySelectorAll('.df-axis .df-axis-cell')].map(c => Math.round(c.getBoundingClientRect().top));
+      const bands = [...document.querySelectorAll('.df-device')].map(c => Math.round(c.getBoundingClientRect().top));
+      return {
+        statementClipped: st.top < bar.bottom - 1,
+        labelVisible: label.width > 0 && label.left >= 0,
+        labelAboveFrame: label.bottom <= frame.top + 1,
+        labelEndsOnDatum: Math.abs(label.right - datum.left) <= 6,
+        indicesAligned: cells.length === bands.length && cells.every((t, i) => Math.abs(t - bands[i]) <= 1),
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+    // The fixed masthead measured 113px against a hard-coded 108px scroll pad.
+    expect(m.statementClipped, 'the masthead clips the hero statement').toBe(false);
+    // The capacity label was being swallowed by the frame's own clip.
+    expect(m.labelVisible, 'the capacity label is not rendered').toBe(true);
+    expect(m.labelAboveFrame).toBe(true);
+    expect(m.labelEndsOnDatum, 'the label does not read as one dimension with its line').toBe(true);
+    expect(m.indicesAligned, 'the device indices drifted off their bands').toBe(true);
+    expect(m.overflow).toBeLessThanOrEqual(0);
+  });
+});

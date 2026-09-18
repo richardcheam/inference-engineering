@@ -5,6 +5,7 @@ import Sequence from './Sequence';
 import Tradeoff from './Tradeoff';
 import LessonSection from './LessonSection';
 import PlacementExplorer from './PlacementExplorer';
+import DivisionField from './DivisionField';
 import { MathFormula } from './Lesson';
 
 export const parallelToc = [
@@ -63,8 +64,9 @@ export default function ParallelLesson() {
       'Watch per-device memory fall while aggregate weights stay fixed, or multiply under replication.',
       'Past the stored KV head count, tensor parallelism replicates the cache instead of splitting it.',
     ]}>
+      <DivisionField figure="12"/>
       <p>Put GLM on eight devices and it fits comfortably. Switch to data parallel and the aggregate weight memory multiplies by eight while each device holds exactly what it held before. Then push the device count past the stored KV heads and watch something less obvious happen.</p>
-      <PlacementExplorer figure="12"/>
+      <PlacementExplorer figure="13"/>
       <p>That last effect catches people out. A checkpoint with eight stored KV heads cannot split its cache more than eight ways. Go to sixteen devices and the heads are replicated, so aggregate cache memory doubles: you added hardware and spent more total memory on the same workload.</p>
     </LessonSection>
 

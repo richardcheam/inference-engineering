@@ -1,0 +1,642 @@
+/* ============================================================================
+   H1 — THE DIVISION FIELD                 Art Direction II · chapter 07 pilot
+
+   A measured drawing, not a chart and not a network diagram. Graphite structure
+   on the shared warm canvas; olive weights and teal cache inside the units;
+   terracotta only on synchronisation marks, replication and overflow; forest
+   only where something is confirmed or selected.
+
+   The composition is a plate and its dimension margin. The drawing breaks the
+   article measure and claims the left gutter, which on a wide screen is space
+   that previously belonged to nothing. Annotation lives in that margin, the way
+   a plan puts its dimension strings outside the object.
+
+   The integrity contract is enforced here by what these rules deliberately do
+   NOT do:
+
+     - no rule sets a unit's width from a quantity
+     - no rule sets a gap's width from a quantity
+     - no rule draws anything between two units
+     - the memory scale, the sync count and the copy count share no length
+
+   Loaded after canvas.css, so it inherits the one-canvas material and adds no
+   surface of its own: the figure has no card, no panel and no border box.
+   ========================================================================= */
+
+.division-field {
+  /* Measured in the component — the article grid's outer tracks are flexible,
+     so these cannot be static values. Unset means "no break", a safe failure. */
+  margin-inline: calc(-1 * var(--bleed-start, 0px)) calc(-1 * var(--bleed-end, 0px));
+  margin-block: var(--space-8, 4rem);
+  padding: 0;
+  background: none;
+  border: 0;
+
+  --gap-w: clamp(0.5rem, 1.1vw, 1.5rem);
+  /* Constant across every state, and sized so the widest population the scale
+     can reach (16) fits the plate exactly. A function of the viewport, never of
+     the data — at D = 1 and D = 16 a unit is the same width, which is the
+     contract. */
+  --unit-w: clamp(0.75rem, (100% - 15 * var(--gap-w)) / 16, 4.5rem);
+  --frame-h: clamp(13rem, 22vw, 26rem);
+  --band-h: 2.25rem;              /* the rotated composition's unit thickness */
+  --margin-col: clamp(11rem, 15vw, 17rem);
+  --margin-gap: clamp(1.5rem, 3vw, 4rem);
+}
+
+/* ---- Head, statement, status --------------------------------------------- */
+.division-field .df-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4, 1rem);
+  padding-bottom: var(--space-2, 0.5rem);
+  border-bottom: 1px solid var(--rule);
+}
+.df-head-name { font-size: var(--text-sm); color: var(--identity); font-weight: 500; }
+.division-field .figure-id {
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+/* The MASS / STRUCTURE treatment: Inter at weight and tightness, not a new
+   family. Deliberately smaller than the first pass — the headline introduces
+   the argument, the object carries it. */
+.df-statement {
+  margin: var(--space-5, 1.5rem) 0 0;
+  max-inline-size: 30ch;
+  font-size: clamp(1.5rem, 2.4vw, 2.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+  color: var(--ink);
+}
+.df-statement > b { display: block; font-weight: inherit; }
+.df-statement-cost { color: var(--graphite); }
+
+/* The epistemic status travels with the number. Never optional. */
+.df-status {
+  margin: var(--space-3, 0.75rem) 0 0;
+  max-inline-size: 44rem;
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: rgb(20 20 20 / 62%);
+}
+
+/* ---- Shared annotation type ---------------------------------------------- */
+.df-reading-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+/* ---- The device scale: the control --------------------------------------- */
+.df-scale { margin-top: var(--space-6, 2rem); max-inline-size: min(100%, 34rem); }
+.df-scale-track { position: relative; margin-top: var(--space-2, 0.5rem); }
+.df-scale-input {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 2.75rem;
+  min-height: 2.75rem;            /* a 44px target; UA metrics win without it */
+  margin: 0;
+  background: none;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+}
+.df-scale-input::-webkit-slider-runnable-track { height: 2.75rem; background: none; }
+.df-scale-input::-moz-range-track { height: 2.75rem; background: none; }
+.df-scale-input::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 1.25rem; height: 2.75rem; background: none; }
+.df-scale-input::-moz-range-thumb { width: 1.25rem; height: 2.75rem; background: none; border: 0; }
+
+/* Focus is expressed through the scale itself: the current tick lengthens and
+   takes the identity colour, and its number goes to full ink. No container
+   outline — the control is a scale bar, not a box. */
+.df-scale-input:focus,
+.df-scale-input:focus-visible { outline: none; }
+
+.df-stops {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+/* The rule the stops stand on. */
+.df-stops::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% - 0.5px);
+  height: 1px;
+  background: var(--rule-strong);
+}
+.df-stops > li {
+  position: absolute;
+  left: var(--at);
+  top: 0;
+  bottom: 0;
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 0.35rem;
+}
+.df-stop-tick {
+  width: 1px;
+  height: 0.5rem;
+  background: var(--rule-strong);
+  transition: height var(--dur-ui, 240ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)), background-color var(--dur-ui, 240ms) ease;
+}
+.df-stops button {
+  pointer-events: auto;
+  background: none;
+  border: 0;
+  padding: 0 0.3rem;
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  cursor: pointer;
+}
+.df-stops .current .df-stop-tick { height: 1.15rem; width: 2px; background: var(--identity); }
+.df-stops .current button { color: var(--ink); }
+/* Focus: the current stop declares itself louder still. */
+.df-scale-track:focus-within .current .df-stop-tick {
+  height: 1.75rem;
+  box-shadow: 0 0 0 3px rgb(60 84 64 / 20%);
+}
+.df-scale-track:focus-within .current button { color: var(--identity); font-weight: 600; }
+
+/* ---- The plate ------------------------------------------------------------ */
+.df-plate { margin-top: var(--space-6, 2rem); }
+
+.df-dimensions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5, 1.5rem) var(--space-6, 2rem);
+  padding-bottom: var(--space-4, 1rem);
+}
+.df-reading-value {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--mono);
+  font-size: var(--text-lg);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: var(--ink);
+}
+.df-reading-value small { margin-left: 0.35em; font-size: var(--text-xs); color: var(--muted); }
+.df-reading.over .df-reading-value { color: var(--warning); }
+.df-reading.only-narrow { display: none; }
+
+/* The overflow annotation is instrumentation, not a sentence. */
+.df-instrument {
+  display: grid;
+  gap: 2px;
+  padding-left: var(--space-4, 1rem);
+  border-left: 2px solid var(--warning);
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  color: var(--warning);
+}
+.df-instrument > span:first-child { font-size: var(--text-md); line-height: 1.15; }
+.df-instrument-note { color: var(--muted); letter-spacing: 0.1em; }
+
+/* ---- Register 1 — memory -------------------------------------------------- */
+.df-frame {
+  position: relative;
+  height: var(--frame-h);
+  /* Clipped on purpose: a state larger than the frame is annotated with its
+     multiple rather than rescaled, because rescaling per state would destroy
+     the comparison between states. */
+  overflow: hidden;
+  border-bottom: 1px solid var(--rule-strong);   /* the baseline units stand on */
+}
+
+/* The capacity datum: a reference line at a real value on the memory scale.
+   Inert — no pointer events, no focus, no hit area. */
+.df-datum {
+  position: absolute;
+  inset-inline: 0;
+  bottom: var(--capacity);
+  height: 0;
+  border-top: 1px dashed var(--rule-strong);
+  pointer-events: none;
+  z-index: 2;
+}
+.df-datum::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -4px;
+  width: 1px;
+  height: 9px;
+  background: var(--rule-strong);
+}
+.df-datum-label {
+  position: absolute;
+  right: 0;
+  bottom: 4px;
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+.df-devices {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: var(--gap-w);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.df-device {
+  position: relative;
+  /* Constant. A device is a device. This width is not a quantity. */
+  flex: 0 0 var(--unit-w);
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+.df-fill {
+  position: relative;
+  width: 100%;
+  height: 100%;                   /* so the bands resolve against the frame */
+  display: flex;
+  flex-direction: column-reverse; /* weights at the base, cache above */
+  justify-content: flex-start;
+  align-items: stretch;
+}
+.df-band {
+  display: block;
+  flex: 0 0 auto;
+  width: 100%;
+  height: var(--extent, 0%);
+  transition: height var(--dur-ui, 240ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+}
+.df-weights { background: var(--efficient); }
+.df-cache { background: var(--flow); }
+
+/* A state that runs past the frame is marked, not rescaled. */
+.df-fill[data-exceeds='true']::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 4px;
+  background: repeating-linear-gradient(90deg, var(--warning) 0 3px, transparent 3px 6px);
+}
+
+/* The headroom dimension: a measured band, drawn the way a plan dimensions a
+   clear distance — a line between two end ticks, with the value beside it. */
+.df-headroom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--from);
+  height: calc(var(--to) - var(--from));
+  pointer-events: none;
+  z-index: 1;
+}
+.df-headroom::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--rule);
+}
+.df-headroom-label {
+  position: absolute;
+  left: var(--space-3, 0.75rem);
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.df-headroom-label small { margin-left: 0.4em; font-size: var(--text-meta); letter-spacing: 0.1em; }
+
+/* ---- The index axis ------------------------------------------------------- */
+.df-axis {
+  display: flex;
+  gap: var(--gap-w);
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  height: 1rem;
+}
+.df-axis-cell {
+  position: relative;
+  flex: 0 0 var(--unit-w);        /* the same constant width. Still not a quantity. */
+  height: 100%;
+}
+.df-index {
+  display: block;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  color: var(--muted);
+}
+
+/* ---- Registers 2 and 3 ---------------------------------------------------- */
+.df-register {
+  margin-top: var(--space-5, 1.5rem);
+  padding-top: var(--space-4, 1rem);
+  border-top: 1px solid var(--rule);
+}
+.df-register-read {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2, 0.5rem) var(--space-4, 1rem);
+  margin: var(--space-3, 0.75rem) 0 0;
+}
+.df-register-note {
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  color: var(--muted);
+}
+
+/* Register 2 — the marks are the evidence, each counted in house notation. */
+.df-sync-rail {
+  display: flex;
+  gap: var(--gap-w);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  height: 2.1rem;
+}
+.df-sync {
+  position: absolute;
+  /* In the gap the layout already leaves, so it consumes no width and cannot
+     touch the memory scale. A count, not a connection. */
+  right: calc(-1 * var(--gap-w) / 2 - 1px);
+  top: 0;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+}
+.df-sync-tick { display: block; width: 2px; height: 0.9rem; background: var(--warning); }
+.df-sync-n {
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  font-variant-numeric: tabular-nums;
+  color: var(--warning);
+}
+
+/* Register 3 — replication as a structural event: one unit is one whole copy. */
+.df-copies { display: flex; gap: var(--space-2, 0.5rem); margin: 0; padding: 0; list-style: none; }
+.df-copy {
+  display: grid;
+  place-items: end start;
+  width: clamp(5rem, 12vw, 11rem);
+  height: 2.5rem;
+  padding: 0 0 0.35rem 0.5rem;
+  background: color-mix(in oklab, var(--flow) 20%, transparent);
+  border-left: 2px solid var(--flow);
+}
+.df-copy small { font-family: var(--mono); font-size: var(--text-meta); color: var(--graphite); }
+/* The copy that exists only because the stored heads ran out. */
+.df-copies-register[data-replicated] .df-copy:last-child {
+  background: color-mix(in oklab, var(--warning) 16%, transparent);
+  border-left-color: var(--warning);
+}
+.df-copies-register[data-replicated] .df-register-note { color: var(--warning); }
+
+/* ---- Assistive-technology text -------------------------------------------- */
+.df-summary {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.df-provenance {
+  margin: var(--space-6, 2rem) 0 0;
+  max-inline-size: var(--reading);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  color: var(--muted);
+}
+.df-provenance code { font-family: var(--mono); font-size: 0.95em; }
+
+/* ---- Motion: split → place → accumulate ----------------------------------- */
+@keyframes df-place { from { opacity: 0; transform: translateY(8px); } }
+.df-device { animation: df-place var(--dur-ui, 240ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both; }
+
+@keyframes df-accumulate { from { opacity: 0; } }
+.df-sync { animation: df-accumulate 120ms linear both; animation-delay: min(calc(var(--i) * 55ms), 600ms); }
+.df-copy { animation: df-accumulate 180ms linear both; animation-delay: calc(var(--i) * 90ms); }
+
+@media (prefers-reduced-motion: reduce) {
+  .df-device,
+  .df-sync,
+  .df-copy { animation: none; }
+  .df-band,
+  .df-stop-tick { transition: none; }
+}
+
+/* ============================================================================
+   >= 1500px — the dimension margin claims the left gutter.
+   The plate becomes two columns: annotation outside the object, as a plan puts
+   its dimension strings in the margin rather than across the drawing.
+   ========================================================================= */
+/* 1800px, not 1500: below this the article already takes nearly the whole
+   workspace, so a 17rem margin column costs the object more width than the
+   break gains it — units measured 29px at 1512 with the margin on, 46px with
+   it off. The margin is only worth taking where there is genuine surplus. */
+@media (min-width: 2100px) {
+  .df-plate {
+    display: grid;
+    grid-template-columns: var(--margin-col) minmax(0, 1fr);
+    column-gap: var(--margin-gap);
+    align-items: start;
+  }
+  .df-dimensions {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    text-align: right;
+    gap: var(--space-5, 1.5rem);
+    padding: 0 clamp(1rem, 2vw, 2rem) 0 0;
+    border-right: 1px solid var(--rule);
+  }
+  .df-instrument {
+    text-align: right;
+    padding: 0 var(--space-3, 0.75rem) 0 0;
+    border-left: 0;
+    border-right: 2px solid var(--warning);
+  }
+  /* The statement, status and control sit on the object's column, so the left
+     margin belongs entirely to instrumentation. */
+  .df-statement,
+  .df-status,
+  .df-scale { margin-left: calc(var(--margin-col) + var(--margin-gap)); }
+}
+
+/* ============================================================================
+   <= 52rem — the rotation. Not a stack: the axis carrying the quantity moves
+   from vertical to horizontal, which is the axis a phone has room for.
+   ========================================================================= */
+@media (max-width: 52rem) {
+  .division-field {
+    --gap-w: 0.75rem;
+    --frame-h: auto;
+  }
+  .df-statement { font-size: clamp(1.5rem, 7.5vw, 2.25rem); max-inline-size: none; }
+  .df-scale { max-inline-size: none; }
+
+  /* The instrumentation plate and the technical field are two different kinds
+     of thing, so the distance between them is larger than the distance within
+     either. */
+  .df-dimensions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4, 1rem);
+    padding-bottom: var(--space-7, 3rem);
+  }
+  .df-register { margin-top: var(--space-6, 2rem); }
+  .df-reading-value { font-size: var(--text-md); }
+  /* The overflow instrument spans both columns and stays a stack of readings,
+     never a sentence — a sentence here wrapped into a block that broke the
+     composition at one device. */
+  .df-instrument { grid-column: 1 / -1; }
+
+  /* Two columns: the rotated index, then the plate. The grid belongs to the
+     OBJECT, because the index axis and the frame are siblings there — putting
+     it on the frame did nothing and dropped the indices below the bands. */
+  .df-object {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    column-gap: 0;
+    align-items: start;
+  }
+  .df-frame {
+    position: relative;
+    grid-column: 2;
+    grid-row: 1;
+    height: auto;
+    /* Not clipped here. Every extent is already clamped to 100% in the
+       component, so nothing can escape the frame — and the clip was swallowing
+       the capacity label, which sits above the frame in this composition. */
+    overflow: visible;
+    border-bottom: 0;
+  }
+  .df-register { grid-column: 1 / -1; }
+  .df-devices {
+    position: static;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--gap-w);
+  }
+  .df-device { flex: 0 0 var(--band-h); height: var(--band-h); align-items: stretch; }
+  .df-fill { flex-direction: row; height: 100%; }
+  /* The same `--extent` percentage of the same absolute frame, now as length. */
+  .df-band {
+    height: 100%;
+    width: var(--extent, 0%);
+    transition: width var(--dur-ui, 240ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+  }
+  .df-fill[data-exceeds='true']::before {
+    inset-inline: auto 0;
+    top: 0;
+    bottom: 0;
+    height: auto;
+    width: 4px;
+    background: repeating-linear-gradient(180deg, var(--warning) 0 3px, transparent 3px 6px);
+  }
+
+  /* The capacity datum stands vertically; the bands cross it or fall short. */
+  .df-datum {
+    position: absolute;
+    inset: 0 auto 0 auto;
+    left: var(--capacity);
+    width: 0;
+    height: auto;
+    border-top: 0;
+    border-left: 1px dashed var(--rule-strong);
+  }
+  .df-datum::after { left: -4px; top: 0; width: 9px; height: 1px; }
+  /* The label sits ABOVE the frame rather than rotated inside it: at one device
+     the band is over capacity and ran the full width, so a label inside the
+     frame was printed on top of the olive and became unreadable. */
+  /* The label sits above the frame and ends on the datum it names, so the line
+     and its value read as one dimension. */
+  .df-datum-label {
+    right: auto;
+    left: 0;
+    bottom: auto;
+    top: -1.4rem;
+    transform: translateX(-100%);
+    padding-right: 0.4rem;
+    writing-mode: horizontal-tb;
+    white-space: nowrap;
+  }
+
+  /* Room above the frame for that label. */
+  .df-frame { margin-top: 1.6rem; }
+  .df-axis { margin-top: 1.6rem; }
+
+  /* The index column rotates with the field. */
+  .df-axis {
+    grid-column: 1;
+    grid-row: 1;
+    flex-direction: column;
+    gap: var(--gap-w);
+    height: auto;
+  }
+  .df-axis .df-axis-cell { flex: 0 0 var(--band-h); height: var(--band-h); }
+  .df-index { text-align: left; line-height: var(--band-h); }
+
+  /* Register 2 rotates too: the marks become a counted column. Left horizontal,
+     a 16-cell rail is 588px wide and pushed the whole document sideways — the
+     one failure this composition is not allowed to have. */
+  .df-sync-rail {
+    flex-direction: column;
+    gap: 0.4rem;
+    height: auto;
+  }
+  .df-sync-rail .df-axis-cell { flex: 0 0 auto; height: 1.1rem; }
+  .df-sync {
+    position: static;
+    grid-auto-flow: column;
+    justify-content: start;
+    justify-items: start;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .df-sync-tick { width: 1.75rem; height: 2px; }
+
+  /* The headroom dimension does not survive the rotation: every horizontal
+     position inside the frame is occupied by a band, so its label had nowhere
+     to sit that was not printed on top of one. It becomes a reading in the
+     dimension grid, which has room here and states the same quantity. */
+  .df-headroom { display: none; }
+  .df-reading.only-narrow { display: block; }
+
+  .df-copies { flex-direction: column; gap: 0.35rem; }
+  .df-copy { width: 100%; height: 2rem; }
+}

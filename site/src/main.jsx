@@ -15,6 +15,7 @@ import './playback.css';
 import './sequence.css';
 import './masthead.css';
 import './search.css';
+import './division-field.css';
 
 import App from './App';
 import ErrorBoundary from './ErrorBoundary';

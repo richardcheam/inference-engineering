@@ -54,7 +54,7 @@ export default function QuantizeLesson() {
       'Watch the scale overhead grow as the group shrinks.',
     ]}>
       <p>Take a hundred-billion-parameter model and move it between formats. The payload shrinks with the bit width, the scales appear as a separate slice, and the effective bits per parameter never quite matches the number on the label.</p>
-      <PrecisionExplorer figure="13"/>
+      <PrecisionExplorer figure="14"/>
       <p>This is also why our four pinned checkpoints were measured by summing their tensor indices rather than multiplying a parameter count by a bit width. Real checkpoints mix formats across tensors, and the only reliable footprint is the one the index actually reports.</p>
     </LessonSection>
 
