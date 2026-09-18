@@ -84,7 +84,12 @@
   --data-3:        #bfa878;  /* overhead / tertiary series                   */
   --shadow: 0 1px 2px rgb(30 42 36 / 5%);
 
-  --serif: 'Newsreader Variable', Georgia, serif;
+  /* No serif is loaded or rendered anywhere. `editorial.css` aliases --serif to
+     Inter, so the ~20 `font-family: var(--serif)` call sites all resolve to the
+     grotesk. The name is kept because those call sites depend on it; the dead
+     Newsreader stack is not, because a declaration that never applies is a lie
+     in the codebase. */
+  --serif: var(--sans, 'Inter Variable', Inter, sans-serif);
 }
 
 [data-theme='dark'] {

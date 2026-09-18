@@ -160,7 +160,7 @@ reusable half; the scheduler stage is the lesson-specific half.
 lifted. Module 12's limits still apply: one explanatory scene per lesson at most,
 and motion only where it teaches something a static figure cannot.
 
-**Decision:** scenes in chapters 3, 4 and 7 — prefill versus decode, the
+**Decision:** scenes in chapters 3, 4 and 7: prefill versus decode, the
 scheduler, and the device ladder. The other seven chapters stay static, each for
 a stated reason: arithmetic rather than sequence (1, 2), a reasoning structure
 rather than a mechanism (6), a comparison better shown side by side (8), an
@@ -194,7 +194,7 @@ mode rather than a different part of the same page.
 
 ## 2026-09-17 · Living examples autoplay; the concept is the controller
 
-**Context:** `Transport.jsx` carried a deliberate rule in its header — *"Never
+**Context:** `Transport.jsx` carried a deliberate rule in its header, *"Never
 autoplays: an animation that starts moving before you have read the setup is
 harder to follow."* Module 13 §4 asks for the opposite: examples begin when they
 meaningfully enter the viewport.
@@ -207,8 +207,8 @@ trip; and under `prefers-reduced-motion` nothing ever starts itself, though Play
 remains available.
 
 **Why the original concern is met:** the earlier rule protected the reader from
-motion arriving before context. The viewport threshold does that better — the
-setup is read on the way in — and the persistent `USER_PAUSED` state means the
+motion arriving before context. The viewport threshold does that better, because the
+setup is read on the way in, and the persistent `USER_PAUSED` state means the
 page never argues with someone who has stopped it.
 
 **Also:** previous, next and reset are gone. The conceptual stages are the
@@ -236,7 +236,7 @@ says what it answers can be checked. Where real numbers exist, the object is a
 better argument than a diagram of one, and every figure in the trade-off comes
 from `placeMemory`, so it cannot drift from the explorer beside it.
 
-**Kept:** arrows where direction is the information — `text → tokens`, the two
+**Kept:** arrows where direction is the information: `text → tokens`, the two
 chart axis labels, the reuse change from three to forty-seven per cent, and
 every link and fold control.
 
