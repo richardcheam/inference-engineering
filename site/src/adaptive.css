@@ -119,14 +119,25 @@
   .ds .article .prose ol,
   .ds .article .prose blockquote { max-inline-size: var(--technical); }
 
-  /* Headings read as editorial statements, so they get more room than prose
-     but stay bounded — §8 warns against absurd type on large displays.      */
   /* §8 of the width brief: the hero and the body should feel related. Below
      the two-column threshold the title takes exactly the reading measure, so
      the hero and the first paragraph share one column edge. Above it the title
      has its own grid column and is deliberately tighter than the body. */
   .ds .article h1 { max-inline-size: var(--technical); }
-  .ds .lesson-section h2 { max-inline-size: min(var(--prose), 26ch); }
+
+  /* Module 16: a section heading uses the region it actually owns.
+  
+     This was `min(var(--prose), 26ch)`. The 26ch always won — it resolves to
+     637px — so every section heading was 638px wide inside a region of 901px
+     at 1512 and 1184px at 2560, and wrapped to two lines with 264–546px of
+     empty space beside it that nothing occupied. "More aggregate memory is not
+     more speed." needs 749px on one line and would have fitted at every one of
+     those widths.
+  
+     The heading's region is the article column, which `--technical` already
+     bounds at 74rem, so no cap of its own is needed. Ordinary information
+     hierarchy wraps when the region ends, not because a rule wanted two lines. */
+  .ds .lesson-section h2 { max-inline-size: none; }
 
   /* Technical artifacts take the full wide track — §6's mapping. */
   .ds .explorer,
@@ -235,7 +246,10 @@
    nothing on a wide track — it still fits on one line there.                */
 .ds .chart-title { flex-wrap: wrap; }
 .ds .chart-title > span { min-width: 0; }
-.ds .chart-title > span:last-child { white-space: normal; text-wrap: balance; }
+/* `normal` is what stopped this label overflowing at 375px; `balance` on a
+   four-word mono label was polish, and module 16 reserves balance for display
+   moments. */
+.ds .chart-title > span:last-child { white-space: normal; text-wrap: pretty; }
 
 /* ---- Touch targets --------------------------------------------------------
    Gate 8 asks for sufficient touch targets. The range controls that drive every
@@ -267,3 +281,28 @@
 @media (min-width: 1100px) {
   .ds .section-heading { justify-content: space-between; }
 }
+
+
+/* ============================================================================
+   Module 16 — line breaks follow the composition, not a habit
+
+   `pretty` fills a line and then avoids an ugly ending. `balance` deliberately
+   redistributes words across lines, which can invent a second line while the
+   first still has room; it belongs to art-directed display moments only, and
+   is opted into by name (the home proposition, the division field's statement).
+   ========================================================================= */
+.ds .lesson-section h2,
+.ds .lesson-section h3,
+.ds .prose h2,
+.ds .prose h3,
+.ds .prose h4,
+.ds .page-description,
+.ds .caption,
+.ds .memory-part h3,
+.ds .takeaway h3,
+.ds .next-lesson h3 { text-wrap: pretty; }
+
+/* A page title is information, not a hero: it may use its region. The 600px cap
+   came from the legacy stylesheet and broke "A place for every question." over
+   two lines inside a 1050px column with nothing beside it. */
+.ds .library-page > h1 { max-width: none; max-inline-size: var(--technical); text-wrap: pretty; }
