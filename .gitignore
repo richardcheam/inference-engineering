@@ -23,5 +23,4 @@ playwright-report/
 # built and record how it looks; they are not part of the published site.
 harness/
 .claude/
-inference_atlas_art_direction_ii_pack/
 design-audit/

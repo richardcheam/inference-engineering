@@ -167,7 +167,8 @@ not bugs to fix, and they are not content work:
 `main` deploys automatically. Commits are authored by the repository owner; do
 not add co-author trailers.
 
-The repository owner keeps design material outside this repo: art-direction
-packs, skill modules, audits and their screenshots. `.gitignore` excludes
-`harness/`, `design-audit/`, `inference_atlas_art_direction_ii_pack/` and
-`.claude/`. Do not commit them or reintroduce them under new names.
+The repository owner keeps design material outside this repo. The design
+skill is personal and lives outside every project; this project's design profile,
+art-direction files and audits live in `harness/` and `design-audit/`, which
+`.gitignore` excludes along with `.claude/`. Do not commit them or reintroduce
+them under new names.
