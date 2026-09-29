@@ -718,12 +718,16 @@ test.describe('editorial playback', () => {
       await page.waitForTimeout(900);
       expect(await page.evaluate(() => document.querySelector('.playback').dataset.mode)).toBe('playing');
 
-      const shape = await page.evaluate(() => ({
-        stages: document.querySelectorAll('.stage-rail li button').length,
-        legacy: document.querySelectorAll('.transport-buttons, .transport-speed').length,
-        speedVisible: !!document.querySelector('.playback-menu'),
-        primaries: document.querySelectorAll('.playback-primary').length,
-      }));
+      // Scoped to the first player: a chapter may hold more than one (§33).
+      const shape = await page.evaluate(() => {
+        const player = document.querySelector('.playback');
+        return {
+          stages: player.querySelectorAll('.stage-rail li button').length,
+          legacy: document.querySelectorAll('.transport-buttons, .transport-speed').length,
+          speedVisible: !!document.querySelector('.playback-menu'),
+          primaries: player.querySelectorAll('.playback-primary').length,
+        };
+      });
       expect(shape.stages, 'the stages are not navigable').toBeGreaterThanOrEqual(2);
       expect(shape.legacy, 'the old transport survives').toBe(0);
       expect(shape.speedVisible, 'speed is on permanent display').toBe(false);
@@ -959,12 +963,12 @@ test.describe('the playback timeline is notation, not a slider', () => {
     const tickOpacity = () => page.evaluate(() =>
       Number(getComputedStyle(document.querySelector('.playback-tick')).opacity));
 
-    await page.evaluate(() => document.querySelectorAll('.stage-rail li')[0].querySelector('button').click());
+    await page.evaluate(() => document.querySelector('.stage-rail').querySelectorAll('li')[0].querySelector('button').click());
     await page.waitForTimeout(250);
     const atStart = await progress();
 
     await page.evaluate(() => {
-      const items = document.querySelectorAll('.stage-rail li');
+      const items = document.querySelector('.stage-rail').querySelectorAll('li');
       items[items.length - 1].querySelector('button').click();
     });
     await page.waitForTimeout(250);

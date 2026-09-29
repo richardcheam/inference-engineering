@@ -41,7 +41,8 @@ const ENTER_RATIO = 0.35;
 const tick = state => (state.frame + 1 >= state.total ? state : { ...state, frame: state.frame + 1 });
 const timelineReducer = (state, action) => (action.type === 'tick' ? tick(state) : transport(state, action));
 
-export function useEditorialPlayback(total) {
+/** `baseMs` is the time per frame at 1×; a figure with longer captions can slow it. */
+export function useEditorialPlayback(total, { baseMs = BASE_MS } = {}) {
   const id = useId();
   const stageRef = useRef(null);
   const [frame, dispatchFrame] = useReducer(timelineReducer, { frame: 0, playing: false, total, speed: 1 });
@@ -90,9 +91,9 @@ export function useEditorialPlayback(total) {
   // One clock for the whole example (§31), derived from the machine.
   useEffect(() => {
     if (!isRunning(play)) return undefined;
-    const timer = setInterval(() => dispatchFrame({ type: 'tick' }), BASE_MS / frame.speed);
+    const timer = setInterval(() => dispatchFrame({ type: 'tick' }), baseMs / frame.speed);
     return () => clearInterval(timer);
-  }, [play.mode, frame.speed]);
+  }, [play.mode, frame.speed, baseMs]);
 
   // The timeline reaching its end is what completes the example.
   useEffect(() => {

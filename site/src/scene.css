@@ -383,3 +383,33 @@
 @media (prefers-reduced-motion: reduce) {
   .ds .scheduler-stage > div { transition: none; opacity: 1; }
 }
+
+/* ---- vLLM engine figure (chapter four, FIG. 17) ---------------------------
+   One new block state, the ghost: free, but still holding its tokens and hash
+   until someone takes it off the front of the free queue. It stays legible
+   without motion because the border is dotted and the fill is faint. */
+.ds .vllm-engine .pool-block.ghost { border-style: dotted; border-width: 2px; border-color: var(--line-strong); }
+.ds .vllm-engine .pool-block.ghost .pool-fill { opacity: 0.35; }
+.ds .vllm-engine .pool-block.ghost b { opacity: 0.55; }
+.ds .vllm-engine .lane.focus .lane-id { outline: 2px solid var(--warn); outline-offset: 2px; }
+.ds .vllm-engine .vllm-code { margin-top: var(--space-2); }
+
+.ds .vllm-free-queue { margin-top: var(--space-4); }
+.ds .vllm-free-queue .stage-label { display: flex; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-2); }
+.ds .vllm-free-queue ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-1); min-height: 2.5rem; }
+.ds .vllm-free-queue li {
+  flex: 0 0 auto; min-width: 2.75rem; padding: var(--space-1) var(--space-2);
+  display: grid; justify-items: center; font-family: var(--mono); font-size: var(--text-xs);
+  border: 1px dashed var(--line-strong); border-radius: var(--radius-md); background: var(--surface-sunk);
+  animation: queue-enter var(--dur-ui) var(--ease-out) both;
+}
+.ds .vllm-free-queue li.ghost { border-style: dotted; border-width: 2px; background: var(--surface); }
+.ds .vllm-free-queue li small { color: var(--muted); }
+.ds .vllm-free-queue li.vllm-free-empty { border-style: solid; color: var(--muted); animation: none; }
+.ds .pool-legend i.vllm-ghost-swatch { border: 2px dotted var(--line-strong); background: none; }
+.ds .pool-legend i.vllm-shared-swatch { border: 2px dashed var(--efficient); background: none; }
+@keyframes queue-enter { from { opacity: 0; transform: translateY(-8px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ds .vllm-free-queue li { animation: none; }
+}

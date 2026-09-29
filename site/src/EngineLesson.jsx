@@ -4,6 +4,7 @@ import Sequence from './Sequence';
 import LessonSection from './LessonSection';
 import PrefixExplorer from './PrefixExplorer';
 import EngineAnimation from './EngineAnimation';
+import VllmEngineAnimation from './VllmEngineAnimation';
 import { MathFormula } from './Lesson';
 import SchedulerScene from './SchedulerScene';
 
@@ -66,11 +67,15 @@ export default function EngineLesson() {
       'Prefill fills whole blocks; decode appends one token per step per request.',
       'A new block opens exactly when the previous one fills.',
       'When the pool runs out, something has to be preempted and recomputed.',
+      'A freed block keeps its contents until another request claims it, so being preempted can cost anything from nothing to everything.',
     ]}>
       <p>The arithmetic above says what a step costs. This says what a step <em>does</em>. Press play and watch the pool fill, or step through it one frame at a time; the interesting moments are easier to catch with the arrow keys than at speed.</p>
       <EngineAnimation figure="08"/>
       <p>The third scenario is the one worth stepping through slowly. Request B arrives with the same prompt as A, reuses the aligned prefix blocks (drawn dashed) and still recomputes the tail. That is the same gap the explorer measured, now visible as blocks rather than as a percentage.</p>
       <p>The second scenario shows something the static picture cannot. Admission checks whether the <em>prompt</em> fits, not whether the request has room to grow, so the pool can run out mid-flight. Then a request that was running gets preempted and its generated tokens are thrown away, to be recomputed later.</p>
+      <p>That model is engine-agnostic on purpose. The next one follows vLLM's own rules at one pinned commit, and slows down to show the part that surprises people: a freed block is not wiped. It goes to a free queue still holding its tokens, and only loses them when another request takes it off the front. How much a preempted request has to recompute depends on what ran in between.</p>
+      <VllmEngineAnimation figure="17"/>
+      <p>Play the first scenario and then the second. They are the same three requests, and the only difference is prefix caching. With it on, B comes back and finds two of its four blocks intact; with it off, B recomputes every token.</p>
     </LessonSection>
 
     <LessonSection id="read-the-source" number="05" label="CHECK IT IN THE IMPLEMENTATION" title="This is in the source, not inferred." summary={[
