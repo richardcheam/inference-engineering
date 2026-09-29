@@ -2,6 +2,8 @@ import comparison from '../../models/feasibility-study.md?raw';
 import hardware from '../../hardware/reference.md?raw';
 import equations from '../../CHEATSHEET.md?raw';
 import engine from '../../engines/vllm/current-state.md?raw';
+import kvPressure from '../../engines/vllm/kv-pressure.md?raw';
+import vllmServing from '../../engines/vllm/serving-moe.md?raw';
 import benchmarking from '../../benchmarking/methodology.md?raw';
 import roadmap from '../../ROADMAP.md?raw';
 import radar from '../../radar/latest.md?raw';
@@ -9,6 +11,7 @@ import decisions from '../../DECISIONS.md?raw';
 import queue from '../../experiments/QUEUE.md?raw';
 import example from '../../experiments/001-feasibility/README.md?raw';
 import sources from '../../research/sources/2026-09-15/README.md?raw';
+import sourcesLater from '../../research/sources/2026-09-29/README.md?raw';
 import introduction from '../../README.md?raw';
 import skills from '../../SKILL_MATRIX.md?raw';
 
@@ -17,6 +20,8 @@ export const documents = [
   { id: 'hardware-reference', title: 'The device reference', short: 'Device reference', category: 'Reference', path: 'hardware/reference.md', text: hardware, description: 'Pinned capacities, bandwidths, topology notes, and what each available tool can and cannot establish.', icon: 'cpu', time: '8 min' },
   { id: 'equations', title: 'The inference essentials', short: 'Memory & equations', category: 'Foundations', path: 'CHEATSHEET.md', text: equations, description: 'A compact reference for memory budgets, cache geometry, performance bounds, and serving metrics.', icon: 'function', time: '5 min' },
   { id: 'engines', title: 'Follow the engine', short: 'Engine internals', category: 'Systems', path: 'engines/vllm/current-state.md', text: engine, description: 'Trace prefix reuse through vLLM and separate documented support from a validated deployment.', icon: 'workflow', time: '7 min' },
+  { id: 'kv-pressure', title: 'When the cache is full', short: 'KV pressure', category: 'Systems', path: 'engines/vllm/kv-pressure.md', text: kvPressure, description: 'What vLLM does when blocks run out: who is preempted, what freeing a block really does, and why a freed block is often still reusable.', icon: 'layers', time: '9 min' },
+  { id: 'vllm-serving', title: 'Serving two new MoE models in vLLM', short: 'vLLM serving decisions', category: 'Systems', path: 'engines/vllm/serving-moe.md', text: vllmServing, description: 'Attention kernels, expert kernels, expert parallelism and speculation, traced through vLLM for DeepSeek V4.1 Flash and MiMo V2.6.', icon: 'cpu', time: '12 min' },
   { id: 'benchmarking', title: 'Measure what matters', short: 'Benchmarking', category: 'Systems', path: 'benchmarking/methodology.md', text: benchmarking, description: 'From a clean baseline to useful goodput. Give every number a workload and a measurement boundary.', icon: 'chart', time: '9 min' },
   { id: 'roadmap', title: 'Your learning path', short: 'Learning path', category: 'Notebook', path: 'ROADMAP.md', text: roadmap, description: 'Ten flexible chapters connecting durable concepts to real inference-engineering decisions.', icon: 'map', time: '6 min' },
   { id: 'radar', title: 'On the inference radar', short: 'Ecosystem radar', category: 'Notebook', path: 'radar/latest.md', text: radar, description: 'The model and engine changes worth your attention, with a reason to learn, investigate, or wait.', icon: 'radar', time: '5 min' },
@@ -24,6 +29,7 @@ export const documents = [
   { id: 'decisions', title: 'Why we chose this approach', short: 'Decision notes', category: 'Notebook', path: 'DECISIONS.md', text: decisions, description: 'The choices behind this learning workspace and the evidence that would change them.', icon: 'notebook', time: '5 min' },
   { id: 'queue', title: 'Questions worth investigating', short: 'Investigation queue', category: 'Notebook', path: 'experiments/QUEUE.md', text: queue, description: 'A small, ordered set of engineering questions, including what needs real hardware.', icon: 'list', time: '4 min' },
   { id: 'sources', title: 'Follow the evidence', short: 'Source registry', category: 'Reference', path: 'research/sources/2026-09-15/README.md', text: sources, description: 'Pinned model configurations, tensor indices, and engine source references behind the notes.', icon: 'file', time: '5 min' },
+  { id: 'sources-2026-09-29', title: 'Follow the evidence, 29 September', short: 'Source registry, 29 Sep', category: 'Reference', path: 'research/sources/2026-09-29/README.md', text: sourcesLater, description: 'The vLLM source files and model configurations behind the KV pressure and MoE serving notes, pinned at one commit.', icon: 'file', time: '3 min' },
   { id: 'about', title: 'A field guide to inference engineering', short: 'About this workspace', category: 'Reference', path: 'README.md', text: introduction, description: 'The purpose, scope, and evidence rules for this personal learning resource.', icon: 'info', time: '3 min' },
   { id: 'skills', title: 'Engineering capabilities', short: 'Capability reference', category: 'Reference', path: 'SKILL_MATRIX.md', text: skills, description: 'A planning reference for the capabilities involved in independent inference engineering.', icon: 'compass', time: '4 min' },
 ];
@@ -46,11 +52,15 @@ export const slugify = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(
 const assetFiles = import.meta.glob([
   '../../research/sources/2026-09-15/*.json',
   '../../research/sources/2026-09-15/*.py',
+  '../../research/sources/2026-09-29/*.json',
+  '../../research/sources/2026-09-29/*.py',
   '../../experiments/001-feasibility/calculations.json',
 ], { eager: true, query: '?url', import: 'default' });
 
 export function resolveDocumentLink(href, sourcePath) {
   if (/^(?:https?:|mailto:)/i.test(href)) return { href, external: true };
+  // A bare route such as `#measure` names a chapter or document, not a heading in this file.
+  if (href.startsWith('#') && allPages.some(p => p.id === href.slice(1).split('~')[0])) return { href };
   const origin = new URL(sourcePath, 'https://atlas.local/');
   const target = new URL(href, origin);
   const path = decodeURIComponent(target.pathname.slice(1));

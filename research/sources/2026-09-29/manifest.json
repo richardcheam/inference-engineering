@@ -1,0 +1,110 @@
+{
+  "retrieved_date": "2026-09-29",
+  "entries": [
+    {
+      "file": "mimo-v2.6-flash-rl.hub.json",
+      "bytes": 14062,
+      "sha256": "e9ee4c9a3028779860468c8a8f0e0e1ce61913738f7ca6532ac6f107c44f49ca",
+      "source_url": "https://huggingface.co/api/models/XiaomiMiMo/MiMo-V2.6-Flash-RL",
+      "model_revision": "5711b268169967567844e1e560e8a3966da959b1"
+    },
+    {
+      "file": "mimo-v2.6-flash-rl.config.json",
+      "bytes": 8068,
+      "sha256": "61bea4a0f7a0dd8969f8cae528761e26b697dd12ff63e98804c3f0945492e621",
+      "source_url": "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Flash-RL/raw/5711b268169967567844e1e560e8a3966da959b1/config.json",
+      "model_revision": "5711b268169967567844e1e560e8a3966da959b1"
+    },
+    {
+      "file": "mimo-v2.6-flash-rl.dflash.config.json",
+      "bytes": 1242,
+      "sha256": "3a65305bd8d9a8bef6ca46866567be1c56f0a867fc802f4749f1333a976590ef",
+      "source_url": "https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Flash-RL/raw/5711b268169967567844e1e560e8a3966da959b1/dflash/config.json",
+      "model_revision": "5711b268169967567844e1e560e8a3966da959b1"
+    },
+    {
+      "file": "vllm-scheduler.py",
+      "bytes": 158384,
+      "sha256": "8977f88e95dfbaa785e61b145edd00358d0d83a5787ef4332e8ccc215c6cc3c0",
+      "source_url": "https://raw.githubusercontent.com/vllm-project/vllm/05d89636fca80d806732ced636ef505f42e6fe35/vllm/v1/core/sched/scheduler.py",
+      "vllm_revision": "05d89636fca80d806732ced636ef505f42e6fe35"
+    },
+    {
+      "file": "vllm-kv-cache-manager.py",
+      "bytes": 41500,
+      "sha256": "62d1e370eb043f1632a1e1a019471b5cb0440f65f045970c7d3bb120841a2b1f",
+      "source_url": "https://raw.githubusercontent.com/vllm-project/vllm/05d89636fca80d806732ced636ef505f42e6fe35/vllm/v1/core/kv_cache_manager.py",
+      "vllm_revision": "05d89636fca80d806732ced636ef505f42e6fe35"
+    },
+    {
+      "file": "vllm-block-pool.py",
+      "bytes": 36366,
+      "sha256": "4b8ab71264415ad3fd1752cb1364568c2d035c22f92e4842843b79e281dbff76",
+      "source_url": "https://raw.githubusercontent.com/vllm-project/vllm/05d89636fca80d806732ced636ef505f42e6fe35/vllm/v1/core/block_pool.py",
+      "vllm_revision": "05d89636fca80d806732ced636ef505f42e6fe35"
+    },
+    {
+      "file": "vllm-kv-cache-utils.py",
+      "bytes": 115062,
+      "sha256": "1652c1f1bf5134dc86b4aff1255b77bc10f5b653f6a00b5a49fd1db8a3d15e14",
+      "source_url": "https://raw.githubusercontent.com/vllm-project/vllm/05d89636fca80d806732ced636ef505f42e6fe35/vllm/v1/core/kv_cache_utils.py",
+      "vllm_revision": "05d89636fca80d806732ced636ef505f42e6fe35"
+    },
+    {
+      "file": "vllm-single-type-kv-cache-manager.py",
+      "bytes": 116669,
+      "sha256": "5c6f1a88a19df458a0f71cbd1be82803a9ba37197945b483b86841d8c77a5e4d",
+      "source_url": "https://raw.githubusercontent.com/vllm-project/vllm/05d89636fca80d806732ced636ef505f42e6fe35/vllm/v1/core/single_type_kv_cache_manager.py",
+      "vllm_revision": "05d89636fca80d806732ced636ef505f42e6fe35"
+    },
+    {
+      "file": "vllm-config-scheduler.py",
+      "bytes": 16178,
+      "sha256": "82bc6805ecf30a9b3d1b678d3270dad919abed011782ad16f1e805a78aa6c241",
+      "source_url": "https://raw.githubusercontent.com/vllm-project/vllm/05d89636fca80d806732ced636ef505f42e6fe35/vllm/config/scheduler.py",
+      "vllm_revision": "05d89636fca80d806732ced636ef505f42e6fe35"
+    },
+    {
+      "file": "vllm-config-kernel.py",
+      "bytes": 15391,
+      "sha256": "249ead9ca4c207ff8ea49c99c5e5332eb84ed990e93e55c493bab20b9a293739",
+      "source_url": "https://raw.githubusercontent.com/vllm-project/vllm/05d89636fca80d806732ced636ef505f42e6fe35/vllm/config/kernel.py",
+      "vllm_revision": "05d89636fca80d806732ced636ef505f42e6fe35"
+    },
+    {
+      "file": "vllm-fused-moe-oracle-mxfp4.py",
+      "bytes": 73386,
+      "sha256": "20ff5a7f591b05fb9f18266db6dc04cebade3d7c143005bd74a1c9bc8449e4ce",
+      "source_url": "https://raw.githubusercontent.com/vllm-project/vllm/05d89636fca80d806732ced636ef505f42e6fe35/vllm/model_executor/layers/fused_moe/oracle/mxfp4.py",
+      "vllm_revision": "05d89636fca80d806732ced636ef505f42e6fe35"
+    },
+    {
+      "file": "vllm-deepseek-v41-nvidia-model.py",
+      "bytes": 68338,
+      "sha256": "1b5b2127e198df6fe3e36e77bf786bb391ebe32dd75669a35b0cbeaceb1f4227",
+      "source_url": "https://raw.githubusercontent.com/vllm-project/vllm/05d89636fca80d806732ced636ef505f42e6fe35/vllm/models/deepseek_v41/nvidia/model.py",
+      "vllm_revision": "05d89636fca80d806732ced636ef505f42e6fe35"
+    },
+    {
+      "file": "vllm-deepseek-v41-attention.py",
+      "bytes": 61485,
+      "sha256": "44b870805c1c796715d13029604428aa38a74dd1eebafbe1cc6879817b66d957",
+      "source_url": "https://raw.githubusercontent.com/vllm-project/vllm/05d89636fca80d806732ced636ef505f42e6fe35/vllm/models/deepseek_v41/attention.py",
+      "vllm_revision": "05d89636fca80d806732ced636ef505f42e6fe35"
+    },
+    {
+      "file": "vllm-model-arch-config-convertor.py",
+      "bytes": 34223,
+      "sha256": "58bec157bc0199581a5f508e54742e55024e4cd900b3d3f575142e45fa31317d",
+      "source_url": "https://raw.githubusercontent.com/vllm-project/vllm/05d89636fca80d806732ced636ef505f42e6fe35/vllm/transformers_utils/model_arch_config_convertor.py",
+      "vllm_revision": "05d89636fca80d806732ced636ef505f42e6fe35"
+    },
+    {
+      "file": "vllm-config-speculative.py",
+      "bytes": 88471,
+      "sha256": "88cec427b52bb1cb56842f9034a4d49a915d05302b92b0249227feaf4d81f3e1",
+      "source_url": "https://raw.githubusercontent.com/vllm-project/vllm/05d89636fca80d806732ced636ef505f42e6fe35/vllm/config/speculative.py",
+      "vllm_revision": "05d89636fca80d806732ced636ef505f42e6fe35"
+    }
+  ]
+}

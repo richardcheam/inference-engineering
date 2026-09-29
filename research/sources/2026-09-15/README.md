@@ -4,6 +4,8 @@ Last researched: 2026-09-15
 
 Only metadata, configuration, and selected source/test files are stored here. No model weights, benchmark outputs, or private workplace data were downloaded.
 
+A later snapshot, pinned at vLLM commit `05d8963`, is in [Source snapshots, 29 September](../2026-09-29/README.md). The files below are unchanged.
+
 ## Model snapshots
 
 | Local prefix | Official repository | Pinned revision |

@@ -59,3 +59,16 @@ export function placeMemory({ model, devices, strategy, context, sequences, kvHe
     replicas, shards,
   };
 }
+
+/**
+ * Experts each EP rank holds, from vLLM's expert distribution formula:
+ * (total experts + redundant experts) ÷ EP ranks. DERIVED; the EP size itself is
+ * TP × DP once expert parallelism is enabled. Uneven splits are refused rather than rounded.
+ */
+export function expertsPerRank({ experts, epRanks, redundant = 0 }) {
+  if (![experts, epRanks].every(n => Number.isSafeInteger(n) && n > 0)) throw new RangeError('Invalid expert count or EP size');
+  if (!Number.isSafeInteger(redundant) || redundant < 0) throw new RangeError('Invalid redundant expert count');
+  const total = experts + redundant;
+  if (total % epRanks !== 0) throw new RangeError('Invalid split: experts do not divide evenly over the EP ranks');
+  return total / epRanks;
+}

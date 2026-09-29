@@ -48,9 +48,12 @@ These files are the site's document routes. They are bundled with `?raw`, so
 | `models/feasibility-study.md` | `#models` |
 | `hardware/reference.md` | `#hardware-reference` |
 | `engines/vllm/current-state.md` | `#engines` |
+| `engines/vllm/kv-pressure.md` | `#kv-pressure` |
+| `engines/vllm/serving-moe.md` | `#vllm-serving` |
 | `benchmarking/methodology.md` | `#benchmarking` |
 | `radar/latest.md` | `#radar` |
 | `research/sources/2026-09-15/README.md` | `#sources` |
+| `research/sources/2026-09-29/README.md` | `#sources-2026-09-29` |
 | `experiments/QUEUE.md` | `#queue` |
 | `experiments/001-feasibility/README.md` | `#example` |
 
@@ -104,7 +107,7 @@ ask, rather than adding a style.
 npm install
 npm run dev          # http://127.0.0.1:4173
 npm run build
-npm test             # 172 unit tests: the calculations
+npm test             # 188 unit tests: the calculations
 npm run test:browser # 96 browser tests: the design and accessibility contract
 ```
 

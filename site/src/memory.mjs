@@ -25,3 +25,23 @@ export function calculateBudget({ model, context, concurrency, capacityGiB, over
     verdict: totalGiB <= capacityGiB ? 'candidate' : 'exceeds',
     partial: meta.partial, scope: meta.scope };
 }
+
+/**
+ * Attention cache held by a group of layers that share one geometry.
+ *
+ * DERIVED. Values per token are layers × KV heads × (K head dim + V head dim), counted
+ * separately because some models give K a wider head than V. A sliding window bounds how
+ * many tokens a layer holds; without one the cache grows with the live context. This is
+ * stored cache only: block rounding, scales, and any backend-specific record format are not
+ * included, so an engine's real per-token record can differ.
+ */
+export function attentionCache({ layers, kvHeads, kHeadDim, vHeadDim, bytesPerValue, liveTokens = 1, window }) {
+  if (![layers, kvHeads, kHeadDim, vHeadDim].every(n => Number.isSafeInteger(n) && n > 0)) throw new RangeError('Invalid cache geometry');
+  if (!Number.isFinite(bytesPerValue) || bytesPerValue <= 0) throw new RangeError('Invalid bytes per value');
+  if (!Number.isSafeInteger(liveTokens) || liveTokens < 0) throw new RangeError('Invalid live token count');
+  if (window !== undefined && !(Number.isSafeInteger(window) && window > 0)) throw new RangeError('Invalid window');
+  const valuesPerToken = layers * kvHeads * (kHeadDim + vHeadDim);
+  const bytesPerToken = valuesPerToken * bytesPerValue;
+  const heldTokens = window === undefined ? liveTokens : Math.min(liveTokens, window);
+  return { valuesPerToken, bytesPerToken, heldTokens, bytes: bytesPerToken * heldTokens };
+}

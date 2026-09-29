@@ -76,3 +76,13 @@ test('every strategy is described well enough to choose between them', () => {
     assert.ok(s.id && s.label && s.shards && s.cost, `${s.id} needs what it shards and what it costs`);
   }
 });
+
+test('expert parallelism divides the experts evenly over the EP ranks', async () => {
+  const { expertsPerRank } = await import('../site/src/parallel.mjs');
+  assert.equal(expertsPerRank({ experts: 384, epRanks: 2 }), 192, 'DeepSeek V4.1 Flash at EP 2');
+  assert.equal(expertsPerRank({ experts: 256, epRanks: 2 }), 128, 'MiMo V2.6 at EP 2');
+  assert.equal(expertsPerRank({ experts: 256, epRanks: 8, redundant: 8 }), 33, 'redundant experts add to the total first');
+  for (const o of [{ epRanks: 0 }, { experts: 0 }, { epRanks: 3 }, { redundant: -1 }]) {
+    assert.throws(() => expertsPerRank({ experts: 256, epRanks: 2, ...o }), /invalid/i, JSON.stringify(o));
+  }
+});

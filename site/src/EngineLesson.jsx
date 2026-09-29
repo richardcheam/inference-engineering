@@ -108,6 +108,7 @@ max_cache_hit_length = request.num_tokens - 1`}</code></pre>
         <span className="eyebrow">EVIDENCE BEHIND THIS LESSON</span>
         <a href="#engines">The pinned source investigation <ArrowUpRight size={13}/></a>
         <a href="#sources">Saved engine source files <ArrowUpRight size={13}/></a>
+        <a href="#kv-pressure">What vLLM does when the pool is full <ArrowUpRight size={13}/></a>
       </div>
     </LessonSection>
 

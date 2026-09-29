@@ -97,6 +97,7 @@ export default function ParallelLesson() {
         <span className="eyebrow">EVIDENCE BEHIND THIS LESSON</span>
         <a href="#hardware-reference">Device capacities and interconnect notes <ArrowUpRight size={13}/></a>
         <a href="#models">Stored KV heads per checkpoint <ArrowUpRight size={13}/></a>
+        <a href="#vllm-serving~parallelism">Expert parallelism in vLLM, for two real models <ArrowUpRight size={13}/></a>
       </div>
     </LessonSection>
 
