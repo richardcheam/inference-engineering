@@ -16,10 +16,12 @@
 
 :root {
   /* ---- Material ---------------------------------------------------------
-     One warm canvas. Tuned against Inter at 18px on this page: lighter than
-     the old #f3f1eb read chalky under the grotesk, darker muddied the ink. */
-  --canvas:      #f2f0e9;
-  --canvas-deep: #edeae1;   /* control tracks and wells, never regions       */
+     One white canvas, matching the owner's portfolio (richardcheam.github.io).
+     It replaced the warm #f2f0e9 on 2026-10-03; the semantic colours below
+     are unchanged. The deep tone is a neutral grey so tracks and wells still
+     read against white. */
+  --canvas:      #ffffff;
+  --canvas-deep: #f5f5f5;   /* control tracks and wells, never regions       */
 
   --ink:      #141414;      /* headings, primary numbers                     */
   --graphite: #3a3a38;      /* body text                                     */
