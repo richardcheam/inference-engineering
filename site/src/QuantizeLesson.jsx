@@ -83,7 +83,7 @@ export default function QuantizeLesson() {
         <span className="eyebrow">EVIDENCE BEHIND THIS LESSON</span>
         <a href="#engines">Per-model engine support evidence <ArrowUpRight size={13}/></a>
         <a href="#models">How the pinned footprints were measured <ArrowUpRight size={13}/></a>
-        <a href="#vllm-serving~expert-kernels-and-marlin">Which expert kernel runs FP4 weights, and why Marlin <ArrowUpRight size={13}/></a>
+        <a href="#vllm-serving~decision-2-the-expert-kernel">Which expert kernel runs FP4 weights, and why Marlin <ArrowUpRight size={13}/></a>
       </div>
     </LessonSection>
 

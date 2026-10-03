@@ -88,7 +88,7 @@ export default function SpeculateLesson() {
         <span className="eyebrow">EVIDENCE BEHIND THIS LESSON</span>
         <a href="#equations">The break-even condition <ArrowUpRight size={13}/></a>
         <a href="#queue">Open questions on speculation <ArrowUpRight size={13}/></a>
-        <a href="#vllm-serving~speculation">DSpark, DFlash and adaptive verification in vLLM <ArrowUpRight size={13}/></a>
+        <a href="#vllm-serving~decision-4-guessing-ahead">DSpark, DFlash and adaptive verification in vLLM <ArrowUpRight size={13}/></a>
       </div>
     </LessonSection>
 
